@@ -8,6 +8,6 @@ clean:
 
 submit: clean
 	git gc
-	cd .. && tar cj $(basename $(shell pwd)) > $(STU_ID).tar.bz2
+	cd .. && tar cj $(shell basename `pwd`) > $(STU_ID).tar.bz2
 
 .PHONY: clean submit
