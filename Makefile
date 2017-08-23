@@ -1,4 +1,7 @@
 -include nemu/Makefile.git
+
+defalut:
+	@echo "Please run 'make' under any subprojects to compile."
  
 clean:
 	-$(MAKE) -C nemu clean
@@ -10,4 +13,4 @@ submit: clean
 	git gc
 	cd .. && tar cj $(shell basename `pwd`) > $(STU_ID).tar.bz2
 
-.PHONY: clean submit
+.PHONY: default clean submit
