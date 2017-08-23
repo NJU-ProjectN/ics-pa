@@ -1,5 +1,7 @@
 #!/bin/bash
 
+log=""
+
 function init() {
   if test -d $1; then
     echo "$1 is already initialized, exiting..."
@@ -7,6 +9,7 @@ function init() {
   fi
 
   git clone -b ics2017 https://github.com/NJU-ProjectN/$1.git
+  log="$log$1 `cd $1 && git log --oneline --no-abbrev-commit -n1`"$'\n'
   rm -rf $1/.git
 
   if test $2; then
@@ -25,7 +28,7 @@ case $input in
     source ~/.bashrc
 
     git add -A
-    git commit -am "ics2017 initialized"
+    git commit -am "ics2017 initialized"$'\n\n'"$log"
 
     echo "Initialization finishes!"
     ;;
