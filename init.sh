@@ -22,9 +22,12 @@ case $input in
     init nexus-am AM_HOME
     init nanos-lite
     init navy-apps NAVY_HOME
+    source ~/.bashrc
 
     git add -A
     git commit -am "ics2017 initialized"
+
+    echo "Initialization finishes!"
     ;;
 
   [nN])
