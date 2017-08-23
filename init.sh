@@ -11,7 +11,7 @@ function init() {
 
   if test $2; then
     sed -i -e "/^export $2=.*/d" ~/.bashrc
-    echo "export $2=`realpath $1`" >> ~/.bashrc
+    echo "export $2=`readlink -e $1`" >> ~/.bashrc
   fi
 }
 
