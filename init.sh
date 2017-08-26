@@ -3,16 +3,18 @@
 log=""
 
 function init() {
-  if test -d $1; then
+  if [ -d $1 ]; then
     echo "$1 is already initialized, exiting..."
     return
   fi
 
-  git clone -b ics2017 https://github.com/NJU-ProjectN/$1.git
+  while [ ! -d $1 ]; do
+    git clone -b ics2017 https://github.com/NJU-ProjectN/$1.git
+  done
   log="$log$1 `cd $1 && git log --oneline --no-abbrev-commit -n1`"$'\n'
   rm -rf $1/.git
 
-  if test $2; then
+  if [ $2 ] ; then
     sed -i -e "/^export $2=.*/d" ~/.bashrc
     echo "export $2=`readlink -e $1`" >> ~/.bashrc
   fi
