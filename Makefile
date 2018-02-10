@@ -1,6 +1,6 @@
 -include nemu/Makefile.git
 
-defalut:
+default:
 	@echo "Please run 'make' under any subprojects to compile."
  
 clean:
