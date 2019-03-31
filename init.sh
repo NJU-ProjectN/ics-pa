@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=ics2018
+version=ics2019
 
 log=""
 
