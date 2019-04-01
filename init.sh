@@ -35,8 +35,8 @@ case $input in
     git commit -am "$version initialized"$'\n\n'"$log"
 
     echo "Initialization finishes!"
-    echo "By default this script will add enviornment variables into ~/.bashrc."
-    echo "If you use shell other than bash, please add these enviornment variables manually."
+    echo "By default this script will add environment variables into ~/.bashrc."
+    echo "If you use shell other than bash, please add these environment variables manually."
     ;;
 
   [nN])
