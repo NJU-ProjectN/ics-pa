@@ -29,7 +29,7 @@ case $input in
     init nexus-am AM_HOME
     init nanos-lite
     init navy-apps NAVY_HOME
-    source ~/.bashrc
+    reset
 
     git add -A
     git commit -am "$version initialized"$'\n\n'"$log"
@@ -37,6 +37,7 @@ case $input in
     echo "Initialization finishes!"
     echo "By default this script will add environment variables into ~/.bashrc."
     echo "If you use shell other than bash, please add these environment variables manually."
+    echo "Try 'echo $NEMU_HOME' to see if environment variables are set porperly. If not, close and run a new terminal and try again"
     ;;
 
   [nN])
