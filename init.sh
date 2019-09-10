@@ -29,13 +29,13 @@ case $input in
     init nexus-am AM_HOME
     init nanos-lite
     init navy-apps NAVY_HOME
-    source ~/.bashrc
 
     git add -A
     git commit -am "$version initialized"$'\n\n'"$log"
 
     echo "Initialization finishes!"
     echo "By default this script will add environment variables into ~/.bashrc."
+    echo "After that, please run 'source ~/.bashrc' to let these variables take effect."
     echo "If you use shell other than bash, please add these environment variables manually."
     ;;
 
