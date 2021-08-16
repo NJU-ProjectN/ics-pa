@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=ics2020
+version=ics2021
 
 function init() {
   if [ -d $1 ]; then
