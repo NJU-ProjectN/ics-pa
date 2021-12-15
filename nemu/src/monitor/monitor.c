@@ -18,7 +18,7 @@ static void welcome() {
   printf("Welcome to %s-NEMU!\n", ASNI_FMT(str(__GUEST_ISA__), ASNI_FG_YELLOW ASNI_BG_RED));
   printf("For help, type \"help\"\n");
   Log("Exercise: Please remove me in the source code and compile NEMU again.");
-  assert(0);
+  assert(114514);
 }
 
 #ifndef CONFIG_TARGET_AM
