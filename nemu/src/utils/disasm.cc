@@ -46,8 +46,8 @@ extern "C" void init_disasm(const char *triple) {
    auto llvmTripleTwine = Twine(triple);
    auto llvmtriple = llvm::Triple(llvmTripleTwine);
    auto Ctx = new llvm::MCContext(llvmtriple,AsmInfo, gMRI, nullptr);
-#else
-+  auto Ctx = new llvm::MCContext(AsmInfo, gMRI, nullptr);
+#elif LLVM_VERSION_MAJOR == 11
+   auto Ctx = new llvm::MCContext(AsmInfo, gMRI, nullptr);
 #endif
   gDisassembler = target->createMCDisassembler(*gSTI, *Ctx);
   gIP = target->createMCInstPrinter(llvm::Triple(gTriple),
