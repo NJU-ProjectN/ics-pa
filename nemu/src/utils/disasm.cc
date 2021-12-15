@@ -4,6 +4,7 @@
 #include "llvm/MC/MCInstPrinter.h"
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
+#include <llvm/ADT/Triple.h>
 
 using namespace llvm;
 
@@ -41,7 +42,9 @@ extern "C" void init_disasm(const char *triple) {
   gMII = target->createMCInstrInfo();
   gMRI = target->createMCRegInfo(gTriple);
   auto AsmInfo = target->createMCAsmInfo(*gMRI, gTriple, MCOptions);
-  auto Ctx = new llvm::MCContext(AsmInfo, gMRI, nullptr);
+  auto llvmTripleTwine = Twine(triple);
+  auto llvmtriple = llvm::Triple(llvmTripleTwine);
+  auto Ctx = new llvm::MCContext(llvmtriple,AsmInfo, gMRI, nullptr);
   gDisassembler = target->createMCDisassembler(*gSTI, *Ctx);
   gIP = target->createMCInstPrinter(llvm::Triple(gTriple),
       AsmInfo->getAssemblerDialect(), *AsmInfo, *gMII, *gMRI);
