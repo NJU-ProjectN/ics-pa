@@ -43,11 +43,11 @@ extern "C" void init_disasm(const char *triple) {
   gMRI = target->createMCRegInfo(gTriple);
   auto AsmInfo = target->createMCAsmInfo(*gMRI, gTriple, MCOptions);
 #if LLVM_VERSION_MAJOR == 13
-  auto llvmTripleTwine = Twine(triple);
-  auto llvmtriple = llvm::Triple(llvmTripleTwine);
-  auto Ctx = new llvm::MCContext(llvmtriple,AsmInfo, gMRI, nullptr);
-#elif LLVM_VERSION_MAJOR == 11
-  auto Ctx = new llvm::MCContext(llvmtriple,AsmInfo, gMRI, nullptr);
+   auto llvmTripleTwine = Twine(triple);
+   auto llvmtriple = llvm::Triple(llvmTripleTwine);
+   auto Ctx = new llvm::MCContext(llvmtriple,AsmInfo, gMRI, nullptr);
+#else
++  auto Ctx = new llvm::MCContext(AsmInfo, gMRI, nullptr);
 #endif
   gDisassembler = target->createMCDisassembler(*gSTI, *Ctx);
   gIP = target->createMCInstPrinter(llvm::Triple(gTriple),
