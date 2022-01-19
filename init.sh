@@ -1,7 +1,6 @@
 #!/bin/bash
 
-version=ics2021
-
+# usage: init repo branch [env]
 function init() {
   if [ -d $1 ]; then
     echo "$1 is already initialized, skipping..."
@@ -9,17 +8,17 @@ function init() {
   fi
 
   while [ ! -d $1 ]; do
-    git clone -b $version https://github.com/NJU-ProjectN/$1.git
+    git clone -b $2 https://github.com/NJU-ProjectN/$1.git
   done
   log="$1 `cd $1 && git log --oneline --no-abbrev-commit -n1`"$'\n'
   rm -rf $1/.git
 
   git add -A $1
-  git commit -am "$1 $version initialized"$'\n\n'"$log"
+  git commit -am "$1 $2 initialized"$'\n\n'"$log"
 
-  if [ $2 ] ; then
-    sed -i -e "/^export $2=.*/d" ~/.bashrc
-    echo "export $2=`readlink -e $1`" >> ~/.bashrc
+  if [ $3 ] ; then
+    sed -i -e "/^export $3=.*/d" ~/.bashrc
+    echo "export $3=`readlink -e $1`" >> ~/.bashrc
 
     echo "By default this script will add environment variables into ~/.bashrc."
     echo "After that, please run 'source ~/.bashrc' to let these variables take effect."
@@ -27,6 +26,7 @@ function init() {
   fi
 }
 
+# usage: init_no_git repo branch
 function init_no_git() {
   if [ -d $1 ]; then
     echo "$1 is already initialized, skipping..."
@@ -34,7 +34,7 @@ function init_no_git() {
   fi
 
   while [ ! -d $1 ]; do
-    git clone -b $version https://github.com/NJU-ProjectN/$1.git
+    git clone -b $2 https://github.com/NJU-ProjectN/$1.git
   done
   log="$1 `cd $1 && git log --oneline --no-abbrev-commit -n1`"$'\n'
 
@@ -42,25 +42,25 @@ function init_no_git() {
   echo "/$1" >> .gitignore
 
   git add -A .gitignore
-  git commit --no-verify --allow-empty -am "$1 $version initialized without tracing"$'\n\n'"$log"
+  git commit --no-verify --allow-empty -am "$1 $2 initialized without tracing"$'\n\n'"$log"
 }
 
 case $1 in
   nemu)
-    init nemu NEMU_HOME
+    init nemu ics2022 NEMU_HOME
     ;;
   abstract-machine)
-    init abstract-machine AM_HOME
-    init_no_git fceux-am
+    init abstract-machine ics2022 AM_HOME
+    init_no_git fceux-am ics2021
     ;;
   am-kernels)
-    init_no_git am-kernels
+    init_no_git am-kernels ics2021
     ;;
   nanos-lite)
-    init nanos-lite
+    init nanos-lite ics2021
     ;;
   navy-apps)
-    init navy-apps NAVY_HOME
+    init navy-apps ics2021 NAVY_HOME
     ;;
   *)
     echo "Invalid input..."
