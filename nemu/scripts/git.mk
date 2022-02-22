@@ -1,5 +1,5 @@
 STUID = 201220000
-STUNAME = 张三
+STUNAME = Paragrf
 
 # DO NOT modify the following code!!!
 
