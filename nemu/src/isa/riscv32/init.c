@@ -12,6 +12,9 @@ static const uint32_t img [] = {
 
 static void restart() {
   /* Set the initial program counter. */
+  /* hhw::note
+   * 常规计算机是在BIOS里固定一段引导程序，通过引导程序来加载客户程序
+   * 这里简化处理是约定从内存里固定位置开始执行指令 */
   cpu.pc = RESET_VECTOR;
 
   /* The zero register is always 0. */

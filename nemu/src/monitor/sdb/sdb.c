@@ -34,6 +34,8 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
+  /* hhw:note 退出时设置状态为quit. */
+  nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
