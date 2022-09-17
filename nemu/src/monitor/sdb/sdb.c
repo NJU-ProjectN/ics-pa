@@ -1,7 +1,10 @@
 #include <isa.h>
 #include <cpu/cpu.h>
+#include <memory/paddr.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <stdio.h>
+#include <string.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -34,12 +37,45 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  /* hhw:note 退出时设置状态为quit. */
+  /* hhw::note 退出时设置状态为quit. */
   nemu_state.state = NEMU_QUIT;
   return -1;
 }
 
 static int cmd_help(char *args);
+
+/* hhw::note 单步执行 */
+static int cmd_si(char *args) {
+  int step = 1;
+
+  if (args != NULL) {
+      step = atoi(args);
+  }
+  cpu_exec(step);
+  return 0;
+}
+
+/* hhw::note info cmd */
+static int cmd_info(char *args) {
+  if (strcmp(args, "r") == 0) {
+    isa_reg_display();
+  } else {
+    printf("Unknown subcommand '%s'\n", args);
+  }
+  return 0;
+}
+
+/* hhw::note scan mem */
+static int cmd_x(char *args) {
+  char *len_str = strtok(NULL, " ");
+  int len = atoi(len_str);
+  int addr = 0x80000000;
+  for (int i = 0; i < len; i ++) {
+      addr += i * 4;
+      printf("0x%08x\t%08x\n", addr, paddr_read(addr, 4));
+  }
+  return 0;
+}
 
 static struct {
   const char *name;
@@ -51,6 +87,9 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
+  { "si", "Step one instruction exactly. Usage: stepi [N].", cmd_si },
+  { "info", "info r -- Display registers. info w -- Display watchpoint.", cmd_info },
+  { "x", "x N EXPR, scan memory.", cmd_x },
 
 };
 
