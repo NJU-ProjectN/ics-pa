@@ -40,10 +40,10 @@ function init() {
 
 case $1 in
   nemu)
-    init NJU-ProjectN/nemu ics2022 nemu true NEMU_HOME
+    init NJU-ProjectN/nemu ics2023 nemu true NEMU_HOME
     ;;
   abstract-machine)
-    init NJU-ProjectN/abstract-machine ics2022 abstract-machine true AM_HOME
+    init NJU-ProjectN/abstract-machine ics2023 abstract-machine true AM_HOME
     init NJU-ProjectN/fceux-am ics2021 fceux-am false
     ;;
   am-kernels)
@@ -53,7 +53,7 @@ case $1 in
     init NJU-ProjectN/nanos-lite ics2021 nanos-lite true
     ;;
   navy-apps)
-    init NJU-ProjectN/navy-apps ics2021 navy-apps true NAVY_HOME
+    init NJU-ProjectN/navy-apps ics2023 navy-apps true NAVY_HOME
     ;;
   *)
     echo "Invalid input..."
