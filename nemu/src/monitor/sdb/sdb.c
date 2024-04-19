@@ -49,7 +49,7 @@ static int cmd_c(char *args) {
 
 
 static int cmd_q(char *args) {
-  cpu_exec(NEMU_QUIT);
+  cpu_exec(NEMU_END);
   return -1;
 }
 
