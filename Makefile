@@ -1,5 +1,5 @@
-STUID = 231220000
-STUNAME = 张三
+STUID = 001 
+STUNAME = wbswdd
 
 # DO NOT modify the following code!!!
 
