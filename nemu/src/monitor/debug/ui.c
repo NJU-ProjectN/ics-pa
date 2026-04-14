@@ -38,6 +38,94 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args) {
+  int steps = 1;
+  if (args != NULL) {
+    steps = atoi(args);
+  }
+  cpu_exec(steps);
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  if (args == NULL) {
+    printf("Usage: info r - print register status\n");
+    printf("       info w - print watchpoint status\n");
+    return 0;
+  }
+  if (strcmp(args, "r") == 0) {
+    isa_reg_display();
+  }
+  else if (strcmp(args, "w") == 0) {
+    wp_display();
+  }
+  else {
+    printf("Unknown argument '%s'\n", args);
+  }
+  return 0;
+}
+
+static int cmd_x(char *args) {
+  if (args == NULL) {
+    printf("Usage: x N EXPR\n");
+    return 0;
+  }
+  char *arg1 = strtok(args, " ");
+  char *arg2 = strtok(NULL, " ");
+  if (arg1 == NULL || arg2 == NULL) {
+    printf("Usage: x N EXPR\n");
+    return 0;
+  }
+  int n = atoi(arg1);
+  uint32_t addr = expr(arg2);
+  for (int i = 0; i < n; i++) {
+    printf("0x%08x: 0x%08x\n", addr + i * 4, vaddr_read(addr + i * 4, 4));
+  }
+  return 0;
+}
+
+static int cmd_p(char *args) {
+  if (args == NULL) {
+    printf("Usage: p EXPR\n");
+    return 0;
+  }
+  uint32_t result = expr(args);
+  printf("0x%08x\n", result);
+  return 0;
+}
+
+static int cmd_w(char *args) {
+  if (args == NULL) {
+    printf("Usage: w EXPR\n");
+    return 0;
+  }
+  WP *wp = new_wp();
+  if (wp == NULL) {
+    printf("No free watchpoint.\n");
+    return 0;
+  }
+  strncpy(wp->expr, args, sizeof(wp->expr) - 1);
+  wp->expr[sizeof(wp->expr) - 1] = '\0';
+  wp->value = expr(args);
+  printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  if (args == NULL) {
+    printf("Usage: d N\n");
+    return 0;
+  }
+  int no = atoi(args);
+  if (delete_wp(no) == 0) {
+    printf("Watchpoint %d deleted.\n", no);
+  }
+  else {
+    printf("No watchpoint with number %d.\n", no);
+  }
+  return 0;
+}
+
 static struct {
   char *name;
   char *description;
@@ -46,7 +134,12 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  { "si", "Step into instruction", cmd_si },
+  { "info", "Print register status", cmd_info },
+  { "x", "Scan memory", cmd_x },
+  { "p", "Evaluate expression", cmd_p },
+  { "w", "Set watchpoint", cmd_w },
+  { "d", "Delete watchpoint", cmd_d },
   /* TODO: Add more commands */
 
 };
