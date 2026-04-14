@@ -1,0 +1,86 @@
+# Compilation flags
+ARCH_SPLIT = $(subst -, ,$(ARCH))
+ISA        = $(word 1,$(ARCH_SPLIT))
+PLATFORM   = $(word 2,$(ARCH_SPLIT))
+
+ifeq ($(ISA), mips32)
+CROSS_COMPILE = mips-linux-gnu-
+endif
+
+ifeq ($(ISA), riscv32)
+CROSS_COMPILE = riscv32-unknown-elf-
+endif
+
+ifeq ($(ISA), riscv64)
+CROSS_COMPILE = riscv64-unknown-linux-gnu-
+endif
+
+AS = $(CROSS_COMPILE)gcc
+CC = $(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+LD = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
+READELF = $(CROSS_COMPILE)readelf
+
+ISA_DEF = __ISA_$(shell echo $(ISA) | tr a-z A-Z)__
+
+INCLUDES  = $(addprefix -I, $(INC_DIR)) -I$(AM_HOME)/am/
+INCLUDES += -I$(AM_HOME)/am/arch/$(ARCH)/include
+CFLAGS   += -std=gnu99 -O2 -MMD -Wall -Werror -ggdb $(INCLUDES) -D$(ISA_DEF) -fno-builtin
+CXXFLAGS += -std=c++11 -O2 -MMD -Wall -Werror -ggdb $(INCLUDES) -D$(ISA_DEF) -fno-builtin
+ASFLAGS  +=                -MMD                     $(INCLUDES) -D$(ISA_DEF)
+
+ifeq ($(ISA), mips32)
+CFLAGS_COMMON = -fno-pic -static -fno-strict-aliasing -fno-builtin -fno-stack-protector -fno-delayed-branch -mno-abicalls -march=mips32 -mno-check-zero-division -EL -mno-llsc -mno-imadd -mno-mad
+CFLAGS   += $(CFLAGS_COMMON)
+CXXFLAGS += $(CFLAGS_COMMON) -ffreestanding -fno-rtti -fno-exceptions
+ASFLAGS  += -march=mips32 -EL -mno-check-zero-division -O0 -mno-abicalls -fno-pic -fno-delayed-branch
+endif
+
+ifeq ($(ISA), riscv32)
+# it seems that mstrict-align does not work?
+CFLAGS_COMMON = -fno-pic -static -mcmodel=medany -fno-delete-null-pointer-checks -mabi=ilp32 -march=rv32i -mstrict-align
+CFLAGS   += $(CFLAGS_COMMON)
+CXXFLAGS += $(CFLAGS_COMMON) -ffreestanding -fno-rtti -fno-exceptions
+endif
+
+ifeq ($(ISA), riscv64)
+CFLAGS_COMMON = -fno-pic -static -mcmodel=medany -fno-delete-null-pointer-checks -mabi=lp64 -march=rv64imac
+CFLAGS   += $(CFLAGS_COMMON)
+CXXFLAGS += $(CFLAGS_COMMON) -ffreestanding -fno-rtti -fno-exceptions
+endif
+
+ifeq ($(ISA), x86)
+CFLAGS_COMMON = -m32 -fno-pic -fno-builtin -fno-stack-protector -fno-omit-frame-pointer -march=i386 -mstringop-strategy=unrolled_loop
+CFLAGS   += $(CFLAGS_COMMON)
+CXXFLAGS += $(CFLAGS_COMMON) -ffreestanding -fno-rtti -fno-exceptions
+ASFLAGS  += -m32
+endif
+
+# Files to be compiled
+OBJS = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
+
+# Compilation patterns
+$(DST_DIR)/%.o: %.cpp
+	@echo + CXX $<
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(DST_DIR)/%.o: %.c
+	@echo + CC $<
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c -o $@ $<
+$(DST_DIR)/%.o: %.S
+	@echo + AS $<
+	@mkdir -p $(dir $@)
+	@$(AS) $(ASFLAGS) -c -o $@ $<
+
+# Depencies
+DEPS = $(addprefix $(DST_DIR)/, $(addsuffix .d, $(basename $(SRCS))))
+-include $(DEPS)
+
+# Dependent AM and libraries
+.PHONY: $(LIBS) am
+am:
+	@$(MAKE) -C $(AM_HOME)
+$(sort $(LIBS)): %:
+	-@$(MAKE) -C $(AM_HOME)/libs/$*

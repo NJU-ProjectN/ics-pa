@@ -1,0 +1,14 @@
+ifneq ($(MAKECMDGOALS),clean) # ignore check for make clean
+
+ifeq ($(AM_HOME),) # AM_HOME must exist
+$(error Environment variable AM_HOME must be defined.)
+endif
+
+ARCH ?= native
+ARCHS = $(shell ls $(AM_HOME)/am/arch/)
+
+ifeq ($(filter $(ARCHS), $(ARCH)), ) # ARCH must be valid
+$(error Invalid ARCH. Supported: $(ARCHS))
+endif
+
+endif

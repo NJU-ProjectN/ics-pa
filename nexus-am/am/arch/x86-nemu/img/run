@@ -1,0 +1,3 @@
+#!/bin/bash
+
+make -C $NEMU_HOME run ARGS="-l `dirname $1`/nemu-log.txt $1.bin"

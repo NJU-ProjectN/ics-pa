@@ -1,0 +1,64 @@
+# Compilation flags
+
+ifeq ($(ISA), mips32)
+CROSS_COMPILE = mips-linux-gnu-
+endif
+
+AS = $(CROSS_COMPILE)gcc
+CC = $(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+LD = $(CROSS_COMPILE)ld
+AS = $(CC)
+
+INCLUDES  = $(addprefix -I, $(INC_DIR))
+ISA_DEF = __ISA_$(shell echo $(ISA) | tr a-z A-Z)__
+
+CFLAGS   += -std=gnu99 -O2 -MMD $(INCLUDES) -D$(ISA_DEF) -fdata-sections -ffunction-sections -static
+CXXFLAGS += -std=c++11 -O2 -MMD $(INCLUDES) -D$(ISA_DEF) -fdata-sections -ffunction-sections -static
+ASFLAGS  +=                -MMD $(INCLUDES) -D$(ISA_DEF)
+LDFLAGS  += -e _start
+
+ifeq ($(LINK), dynamic)
+  CFLAGS   += -fPIE
+  CXXFLAGS += -fPIE
+  LDFLAGS  += -fpie -shared
+else
+  LDFLAGS += -Ttext 0x4000000
+endif
+
+ifeq ($(ISA), mips32)
+  CXX = $(CROSS_COMPILE)g++-5
+  CFLAGS   += -fno-strict-aliasing -fno-builtin -fno-stack-protector -fno-delayed-branch -march=mips32 -mno-check-zero-division -EL -mno-llsc -mno-imadd -mno-mad
+  CXXFLAGS += $(CFLAGS_COMMON) -fno-strict-aliasing -fno-builtin -fno-stack-protector -fno-delayed-branch -march=mips32 -mno-check-zero-division -EL -mno-llsc -mno-imadd -mno-mad -ffreestanding -fno-rtti -fno-exceptions
+  ASFLAGS  += -march=mips32 -EL
+  LDFLAGS  += -EL
+endif
+
+ifeq ($(ISA), x86)
+  CFLAGS_COMMON = -m32 -fno-pic -fno-builtin -fno-stack-protector -fno-omit-frame-pointer -march=i386 -mstringop-strategy=unrolled_loop
+  CFLAGS   += $(CFLAGS_COMMON)
+  CXXFLAGS += $(CFLAGS_COMMON) -ffreestanding -fno-rtti -fno-exceptions
+  ASFLAGS  += -m32
+  LDFLAGS  += -melf_i386
+endif
+
+# Files to be compiled
+OBJS = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
+
+# Compilation patterns
+$(DST_DIR)/%.o: %.cpp
+	@echo + CXX $<
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
+$(DST_DIR)/%.o: %.c
+	@echo + CC $<
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) -c -o $@ $<
+$(DST_DIR)/%.o: %.S
+	@echo + AR $<
+	@mkdir -p $(dir $@)
+	@$(AS) $(ASFLAGS) -c -o $@ $<
+
+# Dependencies
+DEPS = $(addprefix $(DST_DIR)/, $(addsuffix .d, $(basename $(SRCS))))
+-include $(DEPS)
