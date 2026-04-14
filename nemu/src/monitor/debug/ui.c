@@ -8,6 +8,17 @@
 #include <readline/history.h>
 
 void cpu_exec(uint64_t);
+void reg_display(){
+  printf("eax: 0x%08x\n", cpu.eax);
+  printf("ecx: 0x%08x\n", cpu.ecx);
+  printf("edx: 0x%08x\n", cpu.edx);
+  printf("ebx: 0x%08x\n", cpu.ebx);
+  printf("esp: 0x%08x\n", cpu.esp);
+  printf("ebp: 0x%08x\n", cpu.ebp);
+  printf("esi: 0x%08x\n", cpu.esi);
+  printf("edi: 0x%08x\n", cpu.edi);
+  printf("eip: 0x%08x\n", cpu.eip);
+}
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 char* rl_gets() {
@@ -54,7 +65,7 @@ static int cmd_info(char *args) {
     return 0;
   }
   if (strcmp(args, "r") == 0) {
-    isa_reg_display();
+    reg_display();
   }
   else if (strcmp(args, "w") == 0) {
     wp_display();
@@ -77,7 +88,12 @@ static int cmd_x(char *args) {
     return 0;
   }
   int n = atoi(arg1);
-  uint32_t addr = expr(arg2);
+  bool isSuccess;
+  uint32_t addr = expr(arg2, &isSuccess);
+  if (!isSuccess) {
+    printf("Invalid expression '%s'\n", arg2);
+    return 0;
+  }
   for (int i = 0; i < n; i++) {
     printf("0x%08x: 0x%08x\n", addr + i * 4, vaddr_read(addr + i * 4, 4));
   }
@@ -89,7 +105,12 @@ static int cmd_p(char *args) {
     printf("Usage: p EXPR\n");
     return 0;
   }
-  uint32_t result = expr(args);
+  bool isSuccess;
+  uint32_t result = expr(args, &isSuccess);
+  if (!isSuccess) {
+    printf("Invalid expression '%s'\n", args);
+    return 0;
+  }
   printf("0x%08x\n", result);
   return 0;
 }
@@ -106,11 +127,16 @@ static int cmd_w(char *args) {
   }
   strncpy(wp->expr, args, sizeof(wp->expr) - 1);
   wp->expr[sizeof(wp->expr) - 1] = '\0';
-  wp->value = expr(args);
+  bool isSuccess;
+  wp->value = expr(args, &isSuccess);
+  if (!isSuccess) {
+    printf("Invalid expression '%s'\n", args);
+    return 0;
+  }
   printf("Watchpoint %d: %s\n", wp->NO, wp->expr);
   return 0;
 }
-
+  
 static int cmd_d(char *args) {
   if (args == NULL) {
     printf("Usage: d N\n");
