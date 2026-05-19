@@ -1,5 +1,6 @@
 #include "nemu.h"
 #include <unistd.h>
+#include <getopt.h>
 
 #define ENTRY_START 0x100000
 
