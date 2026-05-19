@@ -142,8 +142,16 @@ make_EHelper(movsx) {
 }
 
 make_EHelper(movzx) {
-  id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
-  operand_write(id_dest, &id_src->val);
+id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
+
+  uint32_t val = id_src->val;
+  if (id_src->width == 1) {
+    val = (uint8_t)val;  
+  } else if (id_src->width == 2) {
+    val = (uint16_t)val; 
+  }
+
+  operand_write(id_dest, &val);
   print_asm_template2(movzx);
 }
 
