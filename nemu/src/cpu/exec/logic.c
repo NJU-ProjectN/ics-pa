@@ -37,21 +37,37 @@ make_EHelper(or) {
 }
 
 make_EHelper(sar) {
-  TODO();
+  rtl_sar(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+  rtl_update_ZFSF(&t2, id_dest->width);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(sar);
 }
 
 make_EHelper(shl) {
-  TODO();
+  rtl_shl(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+  rtl_update_ZFSF(&t2, id_dest->width);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(shl);
 }
 
 make_EHelper(shr) {
-  TODO();
+  t0 = id_dest->val;
+  switch (id_dest->width) {
+    case 1: t0 = (uint8_t)t0; break;
+    case 2: t0 = (uint16_t)t0; break;
+    case 4: t0 = (uint32_t)t0; break;
+  }
+  
+  rtl_shr(&t2, &t0, &id_src->val);
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  print_asm_template2(shr);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(shr);

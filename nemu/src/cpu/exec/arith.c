@@ -3,14 +3,33 @@
 make_EHelper(add) {
   rtl_add(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
-
+  rtl_update_ZFSF(&t2, id_dest->width);
+  // CF
+  rtl_sltu(&t3, &t2, &id_dest->val);
+  rtl_set_CF(&t3);
+  // OF
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  rtl_not(&t0);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
   print_asm_template2(add);
 }
 
 make_EHelper(sub) {
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
-
+  rtl_update_ZFSF(&t2, id_dest->width);
+  // CF
+  rtl_sltu(&t3, &id_dest->val, &t2);
+  rtl_set_CF(&t3);
+  // OF 
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
   print_asm_template2(sub);
 }
 
@@ -24,14 +43,22 @@ make_EHelper(cmp) {
 make_EHelper(inc) {
   rtl_addi(&t2, &id_dest->val, 1);
   operand_write(id_dest, &t2);
-
+  rtl_update_ZFSF(&t2, id_dest->width);
+  // OF
+  rtl_xor(&t0, &id_dest->val, &t2);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
   print_asm_template1(inc);
 }
 
 make_EHelper(dec) {
   rtl_subi(&t2, &id_dest->val, 1);
   operand_write(id_dest, &t2);
-
+  rtl_update_ZFSF(&t2, id_dest->width);
+  // OF
+  rtl_xor(&t0, &id_dest->val, &t2);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
   print_asm_template1(dec);
 }
 
@@ -101,8 +128,8 @@ make_EHelper(mul) {
       rtl_sr_w(R_DX, &t1);
       break;
     case 4:
-      rtl_sr_l(R_EDX, &t0);
-      rtl_sr_l(R_EAX, &t1);
+      rtl_sr_l(R_EDX, &t1);
+      rtl_sr_l(R_EAX, &t0);
       break;
     default: assert(0);
   }
