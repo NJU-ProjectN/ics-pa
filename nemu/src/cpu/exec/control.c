@@ -25,6 +25,9 @@ make_EHelper(jmp_rm) {
 
 make_EHelper(call) {
   // the target address is calculated at the decode stage
+  printf("[DEBUG CALL] EIP: 0x%08x, Push ReturnAddr: 0x%08x, Next ESP will be: 0x%08x\n", 
+          decoding.seq_eip - 5, decoding.seq_eip, cpu.esp - 4);
+
   rtl_push(&decoding.seq_eip);
   decoding.jmp_eip = decoding.seq_eip + id_dest->val;
   decoding.is_jmp = 1;
@@ -33,7 +36,11 @@ make_EHelper(call) {
 } 
 
 make_EHelper(ret) {
+  printf("[DEBUG RET] Before Pop, Current ESP: 0x%08x, Memory Value at ESP: 0x%08x\n", 
+          cpu.esp, vaddr_read(cpu.esp, 4));
+
   rtl_pop(&t0);
+  printf("[DEBUG RET] After Pop, Popped Target EIP: 0x%08x\n", t0);
   decoding.jmp_eip = t0;
   decoding.is_jmp = 1;
 
