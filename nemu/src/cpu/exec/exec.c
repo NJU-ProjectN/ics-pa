@@ -11,6 +11,15 @@ make_EHelper(cmp);
 make_EHelper(lea);
 make_EHelper(add);
 make_EHelper(and);
+make_EHelper(or);
+make_EHelper(test);
+make_EHelper(inc);
+make_EHelper(dec);
+make_EHelper(neg);
+make_EHelper(adc);
+make_EHelper(sbb);
+make_EHelper(mul);
+make_EHelper(imul);
 
 typedef struct {
   DHelper decode;
@@ -77,8 +86,8 @@ make_group(gp5,
 
   /* 0x0f 0x01*/
 make_group(gp7,
-    EMPTY, EMPTY, EMPTY, EMPTY,
-    EMPTY, EMPTY, EMPTY, EMPTY)
+    EX(inc), EX(dec), EMPTY, EMPTY,
+    EMPTY, EMPTY, EX(push), EMPTY)
 
 /* TODO: Add more instructions!!! */
 
