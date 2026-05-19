@@ -272,8 +272,6 @@ make_DHelper(J) {
     offset = (int8_t)(id_dest->simm & 0xFF);
   } else if (id_dest->width == 4) {
     offset = (int32_t)id_dest->simm;
-    printf("[DEBUG J-4] Current EIP: 0x%08x, Opcode Width: %d, Raw Simm: 0x%08x, Final Offset: %d\n",
-           *eip, id_dest->width, id_dest->simm, offset);
   }
 
   decoding.jmp_eip = *eip + offset;
