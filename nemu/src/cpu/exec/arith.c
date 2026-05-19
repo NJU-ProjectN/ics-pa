@@ -1,29 +1,36 @@
 #include "cpu/exec.h"
 
 make_EHelper(add) {
-  // 🟢 1. 在做加法前，先用不冲突的临时寄存器把源操作数的原始值拷出来
-  rtl_li(&t1, id_dest->val); 
+  // 1. 用独立且绝对安全的局部 C 变量把最原始的源数据、目的数据和结果扣下来
+  // 这样无论底层 RTL 宏怎么倒腾，我们的原始数值绝对不会变！
+  uint32_t original_dest = id_dest->val;
+  uint32_t original_src = id_src->val;
 
-  // 2. 执行加法
+  // 2. 执行核心加法
   rtl_add(&t2, &id_dest->val, &id_src->val);
+  
+  // 3. 立即用局部变量接住相加后的真实结果，防止被后面的写回操作干扰
+  uint32_t result = t2; 
 
-  // 3. 更新 CF (用我们刚刚护住的原始值 t1 进行比较：结果 < 原始值)
-  rtl_sltu(&t3, &t2, &t1);
-  rtl_set_CF(&t3);
-
-  // 4. 写回目的操作数（这一步会污染 id_dest->val，但我们已经不怕了）
+  // 4. 将结果安全写回寄存器或内存
   operand_write(id_dest, &t2);
 
-  // 5. 更新 ZF 和 SF
-  rtl_update_ZFSF(&t2, id_dest->width);
+  // 5. 刷新 ZF 和 SF
+  rtl_update_ZFSF(&result, id_dest->width);
 
-  // 6. 更新 OF (同样，涉及到 id_dest->val 原始值的地方，一律换成安全的 t1)
-  rtl_xor(&t0, &t1, &id_src->val);
-  rtl_not(&t0);
-  rtl_xor(&t2, &t1, &t2); // 注意：这里直接用 t2 参与运算，节省寄存器
-  rtl_and(&t0, &t0, &t2);
-  rtl_msb(&t0, &t0, id_dest->width);
-  rtl_set_OF(&t0);
+  // 6. 用最纯粹、没有 RTL 指针冲突的纯逻辑计算 CF 和 OF
+  // 计算 CF: 如果结果小于任何一个原始加数，说明无符号溢出
+  rtlreg_t cf_val = (result < original_dest) ? 1 : 0;
+  rtl_set_CF(&cf_val);
+
+  // 计算 OF: 如果 (src1 和 src2 符号相同) 且 (结果与 src1 符号不同)，说明有符号溢出
+  // 我们直接在 C 语言层面完成这个位运算，绕开所有垃圾中间寄存器
+  uint32_t of_val = ((original_dest ^ original_src) == 0) && ((original_dest ^ result) < 0);
+  
+  // 如果上面的位运算觉得不直观，可以用更标准的 x86 传统判定法：
+  // of_val = ((original_dest ^ result) & (original_src ^ result)) >> (id_dest->width * 8 - 1);
+  rtlreg_t of_reg = (of_val & 1);
+  rtl_set_OF(&of_reg);
 
   print_asm_template2(add);
 }
