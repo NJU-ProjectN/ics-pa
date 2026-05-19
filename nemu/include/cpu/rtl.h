@@ -177,12 +177,24 @@ static inline void rtl_msb(rtlreg_t* dest, const rtlreg_t* src1, int width) {
 
 static inline void rtl_update_ZF(const rtlreg_t* result, int width) {
   // eflags.ZF <- is_zero(result[width * 8 - 1 .. 0])
-  TODO();
+  uint32_t mask = (width == 4) ? 0xffffffff : (1 << (width * 8)) - 1;
+  
+  if ((*result & mask) == 0) {
+    cpu.eflags |= (1 << 6);
+  } else {
+    cpu.eflags &= ~(1 << 6); // ZF 清 0
+  }
 }
 
 static inline void rtl_update_SF(const rtlreg_t* result, int width) {
   // eflags.SF <- is_sign(result[width * 8 - 1 .. 0])
-  TODO();
+  uint32_t sign_mask = 1 << (width * 8 - 1);
+  
+  if ((*result & sign_mask) != 0) {
+    cpu.eflags |= (1 << 7);
+  } else {
+    cpu.eflags &= ~(1 << 7); 
+  }
 }
 
 static inline void rtl_update_ZFSF(const rtlreg_t* result, int width) {
