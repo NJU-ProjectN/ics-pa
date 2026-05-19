@@ -113,12 +113,26 @@ static inline void rtl_sr(int r, int width, const rtlreg_t* src1) {
 
 #define make_rtl_setget_eflags(f) \
   static inline void concat(rtl_set_, f) (const rtlreg_t* src) { \
-    TODO(); \
+    int shift = 0; \
+    if (#f[0] == 'C') shift = 0;        /* CF */ \
+    else if (#f[0] == 'Z') shift = 6;   /* ZF */ \
+    else if (#f[0] == 'S') shift = 7;   /* SF */ \
+    else if (#f[0] == 'O') shift = 11;  /* OF */ \
+    if (*src) { \
+      cpu.eflags |= (1 << shift); \
+    } else { \
+      cpu.eflags &= ~(1 << shift); \
+    } \
   } \
   static inline void concat(rtl_get_, f) (rtlreg_t* dest) { \
-    TODO(); \
+    int shift = 0; \
+    if (#f[0] == 'C') shift = 0; \
+    else if (#f[0] == 'Z') shift = 6; \
+    else if (#f[0] == 'S') shift = 7; \
+    else if (#f[0] == 'O') shift = 11; \
+    *dest = (cpu.eflags >> shift) & 1; \
   }
-
+  
 make_rtl_setget_eflags(CF)
 make_rtl_setget_eflags(OF)
 make_rtl_setget_eflags(ZF)
