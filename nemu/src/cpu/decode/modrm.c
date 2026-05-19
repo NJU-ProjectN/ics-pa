@@ -14,12 +14,19 @@ void load_addr(vaddr_t *eip, ModR_M *m, Operand *rm) {
     s.val = instr_fetch(eip, 1);
     base_reg = s.base;
     scale = s.ss;
-
     if (s.index != R_ESP) { index_reg = s.index; }
+    
+    // 🟢 特殊处理：如果是 mod=0 且 base=5，则没有基址寄存器，是一个 disp32
+    if (m->mod == 0 && base_reg == 5) {
+      base_reg = -1; 
+      // disp_size 保持为 4 (即 disp32)
+    }
   }
   else {
-    /* no SIB */
     base_reg = m->R_M;
+    // 🟢 特殊处理：如果是 mod=0 且 R_M=5，也是 disp32
+    if (m->mod == 0 && base_reg == R_EBP) { base_reg = -1; }
+    else { disp_size = 0; }
   }
 
   if (m->mod == 0) {
