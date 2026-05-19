@@ -9,6 +9,8 @@ make_EHelper(sub);
 make_EHelper(xor);
 make_EHelper(cmp);
 make_EHelper(lea);
+make_EHelper(add);
+make_EHelper(and);
 
 typedef struct {
   DHelper decode;
@@ -50,8 +52,8 @@ static make_EHelper(name) { \
 
 /* 0x80, 0x81, 0x83 */
 make_group(gp1,
-    EMPTY, EMPTY, EMPTY, EMPTY,
-    EMPTY, EX(sub), EX(xor), EX(cmp))
+    EX(add), EMPTY, EMPTY, EMPTY,
+    EX(and), EX(sub), EX(xor), EX(cmp))
 
   /* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
 make_group(gp2,
