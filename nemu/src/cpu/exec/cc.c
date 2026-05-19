@@ -17,21 +17,49 @@ void rtl_setcc(rtlreg_t* dest, uint8_t subcode) {
     case CC_O:
       rtl_get_OF(dest); 
       break;
+    case CC_NO:
+      rtl_get_OF(dest);
+      rtl_xori(dest, dest, 0x1);
+      break;
     case CC_B:
       rtl_get_CF(dest); 
+      break;
+    case CC_NB:
+      rtl_get_CF(dest);
+      rtl_xori(dest, dest, 0x1);
       break;
     case CC_E:
       rtl_get_ZF(dest); 
       break;
+    case CC_NE:
+      rtl_get_ZF(dest);
+      rtl_xori(dest, dest, 0x1);
+      break;
     case CC_BE:
       rtl_get_CF(dest);
+      break;
+    case CC_NBE:
+      rtl_get_CF(dest);
+      rtl_xori(dest, dest, 0x1);
       break;
     case CC_S:
       rtl_get_SF(dest); 
       break;
+    case CC_NS:
+      rtl_get_SF(dest);
+      rtl_xori(dest, dest, 0x1);
+      break;
+    case CC_P: panic("n86 does not have PF");
+    case CC_NP: panic("n86 does not have PF");
     case CC_L:
       rtl_get_SF(dest);
       rtl_get_OF(dest);
+      break;
+    case CC_NL:
+      rtl_get_SF(dest);
+      rtl_get_OF(dest);
+      rtl_xor(dest, dest, &t0);
+      rtl_xori(dest, dest, 0x1);
       break;
     case CC_LE:
       rtl_get_SF(dest);
@@ -42,8 +70,16 @@ void rtl_setcc(rtlreg_t* dest, uint8_t subcode) {
       rtl_or(dest, dest, &t0);
       rtl_get_ZF(dest);
       break;
+    case CC_NLE:
+      rtl_get_SF(dest);
+      rtl_get_OF(dest);
+      rtl_xor(&t0, &sf, &of);
+      rtl_or(dest, dest, &t0);
+      rtl_get_ZF(dest);
+      rtl_xori(dest, dest, 0x1);
+      break;
     default: panic("should not reach here");
-    case CC_P: panic("n86 does not have PF");
+
   }
 
   if (invert) {
