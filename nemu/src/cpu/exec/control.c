@@ -28,8 +28,12 @@ make_EHelper(call) {
   // printf("[DEBUG CALL] EIP: 0x%08x, Push ReturnAddr: 0x%08x, Next ESP will be: 0x%08x\n", 
   //         decoding.seq_eip - 5, decoding.seq_eip, cpu.esp - 4);
   rtlreg_t return_addr = decoding.seq_eip;
+  printf("[DEBUG CALL EX] Current EIP: 0x%08x | Target Jmp: 0x%08x\n", cpu.eip, id_dest->val);
+  printf("[DEBUG CALL EX] Before sub: ESP = 0x%08x, Target Write Addr = 0x%08x\n", cpu.esp, cpu.esp - 4);
   cpu.esp -= 4;
   vaddr_write(cpu.esp, return_addr, 4);
+  printf("[DEBUG CALL EX] Write Success! Memory[0x%08x] = 0x%08x\n", cpu.esp, vaddr_read(cpu.esp, 4));
+
   decoding.jmp_eip = id_dest->val;
   decoding.is_jmp = 1;
   print_asm("call %x", decoding.jmp_eip);
