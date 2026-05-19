@@ -50,15 +50,19 @@ make_EHelper(call) {
 }
 
 make_EHelper(ret) {
-  printf("[DEBUG RET] Before Pop, Current ESP: 0x%08x, Memory Value at ESP: 0x%08x\n", 
-          cpu.esp, vaddr_read(cpu.esp, 4));
+  // 1. 从当前的栈顶稳稳读出返回地址
+  rtlreg_t target_eip = vaddr_read(cpu.esp, 4);
 
-  rtl_pop(&t0);
-  printf("[DEBUG RET] After Pop, Popped Target EIP: 0x%08x\n", t0);
-  decoding.jmp_eip = t0;
+  // 2. 栈指针恢复（Pop 动作）
+  cpu.esp += 4;
+
+  // 3. 🟢 暴力破局：直接强行改写 CPU 的 eip 和译码跟踪指针，不给框架任何留校查看的机会！
+  cpu.eip = target_eip;
+  decoding.jmp_eip = target_eip;
   decoding.is_jmp = 1;
+  decoding.seq_eip = target_eip; // 全线锁死目标地址
 
-  print_asm("ret"); 
+  print_asm("ret");
 }
 
 make_EHelper(call_rm) {
