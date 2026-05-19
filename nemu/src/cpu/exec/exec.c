@@ -248,7 +248,9 @@ void exec_wrapper(bool print_flag) {
   decoding.p = decoding.asm_buf;
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
 #endif
-
+if (cpu.eip == 0x10005b) {
+    printf("NEMU running 0xff instruction! opcode_table[0xff] is being called.\n");
+}
   decoding.seq_eip = cpu.eip;
   exec_real(&decoding.seq_eip);
 
