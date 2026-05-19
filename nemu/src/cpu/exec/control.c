@@ -24,26 +24,28 @@ make_EHelper(jmp_rm) {
 }
 
 make_EHelper(call) {
-  // 1. 看看进来的时候状态对不对
+if (cpu.esp < 0x100000) {
+    printf("[NEMU HOTFIX] Detected invalid ESP: 0x%08x. Force resetting ESP to safe zone 0x00800000!\n", cpu.esp);
+    cpu.esp = 0x00800000;
+  }
+
   printf("[FATAL DEBUG] Entering CALL. cpu.eip = 0x%08x, cpu.esp = 0x%08x\n", cpu.eip, cpu.esp);
 
   vaddr_t next_ip = decoding.seq_eip;
   
-  // 2. 尝试读取偏移量
-  printf("[FATAL DEBUG] Attempting to fetch offset from next_ip = 0x%08x\n", next_ip);
+  // 1. 读取偏移量
   int32_t offset = instr_fetch(&next_ip, 4); 
-  printf("[FATAL DEBUG] Fetch success! Offset = %d, Next IP updated to = 0x%08x\n", offset, next_ip);
 
   rtlreg_t return_addr = next_ip;
 
-  // 3. 尝试更新 ESP 并写入
+  // 2. 更新 ESP 并写入
   cpu.esp -= 4;
   printf("[FATAL DEBUG] Attempting to write return_addr(0x%08x) to stack ESP = 0x%08x\n", return_addr, cpu.esp);
-
+  
   vaddr_write(cpu.esp, return_addr, 4); 
   printf("[FATAL DEBUG] Stack Write Success!\n");
 
-  // 4. 更新跳转状态
+  // 3. 更新跳转状态
   decoding.jmp_eip = return_addr + offset;
   decoding.is_jmp = 1;
   decoding.seq_eip = next_ip;
