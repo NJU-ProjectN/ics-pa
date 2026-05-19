@@ -1,0 +1,99 @@
+
+/home/kujoenzo/桌面/ics2017/nexus-am/tests/cputest/build/add-x86-nemu：     文件格式 elf32-i386
+
+
+Disassembly of section .text:
+
+00100000 <_start>:
+  100000:	bd 00 00 00 00       	mov    $0x0,%ebp
+  100005:	bc 00 7c 00 00       	mov    $0x7c00,%esp
+  10000a:	e8 0d 00 00 00       	call   10001c <_trm_init>
+  10000f:	90                   	nop
+
+00100010 <_halt>:
+  100010:	55                   	push   %ebp
+  100011:	89 e5                	mov    %esp,%ebp
+  100013:	8b 45 08             	mov    0x8(%ebp),%eax
+  100016:	d6                   	(bad)
+  100017:	eb fe                	jmp    100017 <_halt+0x7>
+  100019:	66 90                	xchg   %ax,%ax
+  10001b:	90                   	nop
+
+0010001c <_trm_init>:
+  10001c:	55                   	push   %ebp
+  10001d:	89 e5                	mov    %esp,%ebp
+  10001f:	83 ec 08             	sub    $0x8,%esp
+  100022:	e8 2d 00 00 00       	call   100054 <main>
+  100027:	d6                   	(bad)
+  100028:	eb fe                	jmp    100028 <_trm_init+0xc>
+  10002a:	66 90                	xchg   %ax,%ax
+
+0010002c <nemu_assert>:
+  10002c:	55                   	push   %ebp
+  10002d:	89 e5                	mov    %esp,%ebp
+  10002f:	8b 45 08             	mov    0x8(%ebp),%eax
+  100032:	85 c0                	test   %eax,%eax
+  100034:	74 02                	je     100038 <nemu_assert+0xc>
+  100036:	5d                   	pop    %ebp
+  100037:	c3                   	ret
+  100038:	c7 45 08 01 00 00 00 	movl   $0x1,0x8(%ebp)
+  10003f:	5d                   	pop    %ebp
+  100040:	e9 cb ff ff ff       	jmp    100010 <_halt>
+  100045:	8d 76 00             	lea    0x0(%esi),%esi
+
+00100048 <add>:
+  100048:	55                   	push   %ebp
+  100049:	89 e5                	mov    %esp,%ebp
+  10004b:	8b 45 0c             	mov    0xc(%ebp),%eax
+  10004e:	03 45 08             	add    0x8(%ebp),%eax
+  100051:	5d                   	pop    %ebp
+  100052:	c3                   	ret
+  100053:	90                   	nop
+
+00100054 <main>:
+  100054:	8d 4c 24 04          	lea    0x4(%esp),%ecx
+  100058:	83 e4 f0             	and    $0xfffffff0,%esp
+  10005b:	ff 71 fc             	push   -0x4(%ecx)
+  10005e:	55                   	push   %ebp
+  10005f:	89 e5                	mov    %esp,%ebp
+  100061:	57                   	push   %edi
+  100062:	56                   	push   %esi
+  100063:	53                   	push   %ebx
+  100064:	51                   	push   %ecx
+  100065:	83 ec 08             	sub    $0x8,%esp
+  100068:	31 ff                	xor    %edi,%edi
+  10006a:	31 f6                	xor    %esi,%esi
+  10006c:	31 db                	xor    %ebx,%ebx
+  10006e:	66 90                	xchg   %ax,%ax
+  100070:	83 ec 0c             	sub    $0xc,%esp
+  100073:	8b 04 b5 e0 01 10 00 	mov    0x1001e0(,%esi,4),%eax
+  10007a:	03 04 9d e0 01 10 00 	add    0x1001e0(,%ebx,4),%eax
+  100081:	3b 84 9f e0 00 10 00 	cmp    0x1000e0(%edi,%ebx,4),%eax
+  100088:	0f 94 c0             	sete   %al
+  10008b:	0f b6 c0             	movzbl %al,%eax
+  10008e:	50                   	push   %eax
+  10008f:	e8 98 ff ff ff       	call   10002c <nemu_assert>
+  100094:	43                   	inc    %ebx
+  100095:	83 c4 10             	add    $0x10,%esp
+  100098:	83 fb 08             	cmp    $0x8,%ebx
+  10009b:	75 d3                	jne    100070 <main+0x1c>
+  10009d:	83 ec 0c             	sub    $0xc,%esp
+  1000a0:	6a 01                	push   $0x1
+  1000a2:	e8 85 ff ff ff       	call   10002c <nemu_assert>
+  1000a7:	46                   	inc    %esi
+  1000a8:	83 c7 20             	add    $0x20,%edi
+  1000ab:	83 c4 10             	add    $0x10,%esp
+  1000ae:	83 fe 08             	cmp    $0x8,%esi
+  1000b1:	75 b9                	jne    10006c <main+0x18>
+  1000b3:	83 ec 0c             	sub    $0xc,%esp
+  1000b6:	6a 01                	push   $0x1
+  1000b8:	e8 6f ff ff ff       	call   10002c <nemu_assert>
+  1000bd:	31 c0                	xor    %eax,%eax
+  1000bf:	8d 65 f0             	lea    -0x10(%ebp),%esp
+  1000c2:	59                   	pop    %ecx
+  1000c3:	5b                   	pop    %ebx
+  1000c4:	5e                   	pop    %esi
+  1000c5:	5f                   	pop    %edi
+  1000c6:	5d                   	pop    %ebp
+  1000c7:	8d 61 fc             	lea    -0x4(%ecx),%esp
+  1000ca:	c3                   	ret

@@ -1,19 +1,30 @@
 #include "cpu/exec.h"
 
 make_EHelper(add) {
+  // 🟢 1. 在做加法前，先用不冲突的临时寄存器把源操作数的原始值拷出来
+  rtl_li(&t1, id_dest->val); 
+
+  // 2. 执行加法
   rtl_add(&t2, &id_dest->val, &id_src->val);
-  operand_write(id_dest, &t2);
-  rtl_update_ZFSF(&t2, id_dest->width);
-  // CF
-  rtl_sltu(&t3, &t2, &id_dest->val);
+
+  // 3. 更新 CF (用我们刚刚护住的原始值 t1 进行比较：结果 < 原始值)
+  rtl_sltu(&t3, &t2, &t1);
   rtl_set_CF(&t3);
-  // OF
-  rtl_xor(&t0, &id_dest->val, &id_src->val);
+
+  // 4. 写回目的操作数（这一步会污染 id_dest->val，但我们已经不怕了）
+  operand_write(id_dest, &t2);
+
+  // 5. 更新 ZF 和 SF
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  // 6. 更新 OF (同样，涉及到 id_dest->val 原始值的地方，一律换成安全的 t1)
+  rtl_xor(&t0, &t1, &id_src->val);
   rtl_not(&t0);
-  rtl_xor(&t1, &id_dest->val, &t2);
-  rtl_and(&t0, &t0, &t1);
+  rtl_xor(&t2, &t1, &t2); // 注意：这里直接用 t2 参与运算，节省寄存器
+  rtl_and(&t0, &t0, &t2);
   rtl_msb(&t0, &t0, id_dest->width);
   rtl_set_OF(&t0);
+
   print_asm_template2(add);
 }
 
