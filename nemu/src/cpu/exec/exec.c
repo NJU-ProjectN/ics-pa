@@ -22,6 +22,11 @@ make_EHelper(mul);
 make_EHelper(imul);
 make_EHelper(nop);
 make_EHelper(setcc);
+make_EHelper(jcc);
+make_EHelper(jmp);
+make_EHelper(jmp_rm);
+make_EHelper(call_rm);
+make_EHelper(not);
 
 typedef struct {
   DHelper decode;
@@ -123,7 +128,7 @@ opcode_entry opcode_table [512] = {
   /* 0x68 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x6c */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x70 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0x74 */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0x74 */	IDEX(I, jcc), EMPTY, EMPTY, EMPTY,
   /* 0x78 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x7c */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x80 */	IDEXW(I2E, gp1, 1), IDEX(I2E, gp1), EMPTY, IDEX(SI2E, gp1),
