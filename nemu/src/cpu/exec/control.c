@@ -27,11 +27,11 @@ make_EHelper(call) {
   // the target address is calculated at the decode stage
   // printf("[DEBUG CALL] EIP: 0x%08x, Push ReturnAddr: 0x%08x, Next ESP will be: 0x%08x\n", 
   //         decoding.seq_eip - 5, decoding.seq_eip, cpu.esp - 4);
-
-  rtl_push(&decoding.seq_eip);
-  decoding.jmp_eip = id_dest->val; 
+  rtlreg_t return_addr = decoding.seq_eip;
+  cpu.esp -= 4;
+  vaddr_write(cpu.esp, return_addr, 4);
+  decoding.jmp_eip = id_dest->val;
   decoding.is_jmp = 1;
-
   print_asm("call %x", decoding.jmp_eip);
 } 
 
