@@ -305,8 +305,8 @@ void exec_wrapper(bool print_flag) {
 #endif
 
 #ifdef DEBUG
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ASM: %s\n", 
-          cpu.eip, cpu.esp, decoding.assembly);
+  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
+    cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
 #else
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
 #endif
