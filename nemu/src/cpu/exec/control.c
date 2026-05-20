@@ -9,25 +9,18 @@ make_EHelper(jmp) {
 }
 
 make_EHelper(jcc) {
-  // the target address is calculated at the decode stage
   uint8_t subcode = decoding.opcode & 0xf;
-  printf("[DEBUG JCC] opcode: 0x%x, subcode: %d, index: %d\n", 
-          decoding.opcode, subcode, subcode >> 1);
-  bool invert = subcode & 0x1;
-  rtl_setcc(&t2, subcode >> 1);
-  if (invert) {
-    rtl_xori(&t2, &t2, 1);
-  }
+  rtl_setcc(&t2, subcode); // 不要 >> 1 ！！！
+  
+  // 打印如果报错可以暂时不管，核心是跳对！
+  print_asm("jcc %x", decoding.seq_eip + id_dest->val); 
+  
   if (t2) {
-    // 条件成立：用整条指令彻底解析完后的下一条地址 seq_eip + 相对偏移量
     decoding.jmp_eip = decoding.seq_eip + id_dest->val;
     decoding.is_jmp = 1;
   } else {
-    // 条件不成立：坚决清零，绝不给后面的指令（比如 xor）留污染！
     decoding.is_jmp = 0;
   }
-
-  print_asm("j%s %x", get_cc_name(subcode >> 1), decoding.seq_eip + id_dest->val);
 }
 
 make_EHelper(jmp_rm) {
