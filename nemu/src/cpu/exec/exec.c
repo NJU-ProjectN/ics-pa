@@ -206,10 +206,10 @@ opcode_entry opcode_table [512] = {
   /* 0x84 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x88 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x8c */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0x90 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0x94 */	IDEX(E, setcc), EMPTY, EMPTY, EMPTY,
-  /* 0x98 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0x9c */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0x90 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
+  /* 0x94 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
+  /* 0x98 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
+  /* 0x9c */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
   /* 0xa0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
@@ -253,7 +253,7 @@ make_EHelper(real) {
   decoding.opcode = opcode; 
   set_width(opcode_table[opcode].width);
   idex(eip, &opcode_table[opcode]);
-  
+
   printf("[LEN_CHECK] EIP: 0x%08x | Opcode: 0x%02x | Next_EIP: 0x%08x | Advanced: %d bytes\n", 
        temp_eip, first_byte, *eip, (int)(*eip - temp_eip));
 }
