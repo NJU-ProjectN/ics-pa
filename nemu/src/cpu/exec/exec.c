@@ -249,7 +249,11 @@ make_EHelper(real) {
 }
 
 static inline void update_eip(void) {
-  cpu.eip = (decoding.is_jmp ? (decoding.is_jmp = 0, decoding.jmp_eip) : decoding.seq_eip);
+  if (decoding.is_jmp) {
+    cpu.eip = decoding.jmp_eip;
+  } else {
+    cpu.eip = decoding.seq_eip;
+  }
 }
 
 void exec_wrapper(bool print_flag) {
@@ -276,14 +280,14 @@ void exec_wrapper(bool print_flag) {
 #ifdef DIFF_TEST
   uint32_t eip = cpu.eip;
 #endif
-
-  update_eip();
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ASM: %s\n", 
           decoding.is_jmp ? decoding.jmp_eip : decoding.seq_eip, cpu.esp, decoding.assembly);
   #else
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
   #endif
+  update_eip();
+  
 #ifdef DIFF_TEST
   void difftest_step(uint32_t);
   difftest_step(eip);
