@@ -34,12 +34,7 @@ make_EHelper(call) {
     // push 返回地址
     rtl_push(&decoding.seq_eip);
 
-    // 计算跳转目标
-    int32_t offset = id_dest->val;
-    if (id_dest->width == 1) offset = (int32_t)(int8_t)id_dest->val;
-    else if (id_dest->width == 2) offset = (int32_t)(int16_t)id_dest->val;
-
-    decoding.jmp_eip = decoding.seq_eip + offset;
+    decoding.jmp_eip = decoding.seq_eip + (int32_t)id_dest->val;
     decoding.is_jmp = 1;
 
     print_asm("call %x", decoding.jmp_eip);
