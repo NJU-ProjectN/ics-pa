@@ -23,7 +23,9 @@ make_EHelper(push) {
     print_asm_template1(push);
     */
   cpu.esp -= 4;
+  printf("[DEBUG PUSH] Before: ESP=0x%08x\n", cpu.esp);
   vaddr_write(cpu.esp, 4, id_src->val); // 直接用 vaddr_write
+  printf("[DEBUG PUSH] After: ESP=0x%08x\n", cpu.esp);
   print_asm_template1(push);
 }
 
