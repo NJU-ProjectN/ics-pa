@@ -321,10 +321,10 @@ void exec_wrapper(bool print_flag) {
 #endif
 
 #ifdef DEBUG
-  //printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
-  //  cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
+  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
+    cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
 #else
-  //printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
+  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
 #endif
 
   update_eip();
@@ -335,12 +335,19 @@ void exec_wrapper(bool print_flag) {
 #endif
 if (cpu.esp != esp_before_exec) {
     uint8_t op = decoding.opcode;
-    // 过滤掉正常的栈操作指令 (push, pop, call, ret 等)
-    if (!((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8)) {
-       printf("\n[🔥 DECODE/EXEC ALARM] 抓到内鬼指令了！\n");
+    
+    // 过滤掉原本的栈操作指令：push, pop, call, ret
+    bool is_standard_stack_op = ((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8);
+    
+    // 过滤掉编译器的栈对齐/分配传参指令：addl / subl 改变的栈
+    int32_t diff = (int32_t)(cpu.esp - esp_before_exec);
+    bool is_stack_align = (op == 0x81 || op == 0x83) && (diff % 4 == 0 && diff >= -64 && diff <= 64);
+
+    if (!is_standard_stack_op && !is_stack_align) {
+       printf("\n[🔥 DECODE/EXEC ALARM] 抓到真正的内鬼指令了！\n");
        printf("在 EIP = 0x%x, Opcode = 0x%x 处：\n", this_eip, op);
        printf("执行前 ESP = 0x%x -> 执行后 ESP = 0x%x (异常位移了 %d 字节！)\n\n", 
-               esp_before_exec, cpu.esp, (int)(cpu.esp - esp_before_exec));
+               esp_before_exec, cpu.esp, diff);
     }
   }
 }

@@ -163,16 +163,16 @@ void read_ModR_M(vaddr_t *eip, Operand *rm, bool load_rm_val, Operand *reg, bool
     }
     else {
       load_addr(eip, &m, rm);
+      
+      // 【地址引渡留在原位，这就足够了！】
       if (cpu.ebp == 0 && rm->addr >= 0xff000000) {
-        int32_t offset = (int32_t)rm->addr; // 强制转换，把 0xfffffff0 解释为 -16
-        
-        // 0x7bb0 是主函数执行任何 push 前的绝对初始栈顶
+        int32_t offset = (int32_t)rm->addr; 
         rm->addr = 0x7bb0 + offset; 
-        
         #ifdef DEBUG
         printf("[DRAP FIX] 检测到外层 EBP=0 负地址寻址，自动映射到物理栈位置: 0x%x\n", rm->addr);
         #endif
       }
+      
       if (load_rm_val) rtl_lm(&rm->val, &rm->addr, rm->width);
     }
   }
