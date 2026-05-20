@@ -267,11 +267,7 @@ make_DHelper(a2O) {
 make_DHelper(J) {
   decode_op_SI(eip, id_dest, false);
   
-  if (id_dest->width == 1) {
-    id_dest->val = (int32_t)(int8_t)id_dest->simm;
-  } else if (id_dest->width == 4) {
-    id_dest->val = (int32_t)id_dest->simm;
-  }
+  id_dest->val = id_dest->simm;
 }
 
 make_DHelper(push_SI) {
