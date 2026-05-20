@@ -59,28 +59,41 @@ make_EHelper(sub) {
 }
 
 make_EHelper(cmp) {
+  // 1. 先用标准的 RTL 执行减法，安全得到原始的 32 位结果
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   
-  // 💥 关键防护：根据当前操作数位宽，把高位脏数据彻底干掉
-  if (id_dest->width == 1)      t2 &= 0xff;
-  else if (id_dest->width == 2) t2 &= 0xffff;
+  // 2. 标志位计算全部抽取到纯粹的 C 语言局部变量中，彻底断绝全局污染
+  uint32_t dest_val = id_dest->val;
+  uint32_t src_val  = id_src->val;
+  uint32_t res_val  = dest_val - src_val; // 原生 C 减法
 
+  // 根据当前操作数的位宽，把高位彻底截断，确保判零（ZF）和符号（SF）完全正确
+  if (id_dest->width == 1) {
+    res_val &= 0xff;
+  } else if (id_dest->width == 2) {
+    res_val &= 0xffff;
+  }
+
+  // 将干净的截断结果用标准 RTL 接口传给 t2，用于更新 ZF 和 SF
+  rtl_li(&t2, res_val);
   rtl_update_ZFSF(&t2, id_dest->width);
   
-  // CF: 保持与 sub 完全纯正一致的逻辑
+  // 3. CF (无符号借位判断): 保持与 sub 完全纯正一致的逻辑
   rtl_sltu(&t3, &id_dest->val, &id_src->val);
   rtl_set_CF(&t3);
   
-  // OF: 保持与 sub 完全纯正一致的逻辑
-  rtl_xor(&t0, &id_dest->val, &id_src->val);
-  rtl_xor(&t1, &id_dest->val, &t2);
-  rtl_and(&t0, &t0, &t1);
+  // 4. OF (有符号溢出判断): 同样采用纯 C 局部变量计算
+  // 经典的减法溢出逻辑：(dest ^ src) & (dest ^ res)
+  uint32_t overflow = (dest_val ^ src_val) & (dest_val ^ res_val);
+  uint32_t of_bit = 0;
 
-  if (id_dest->width == 1)      t0 &= 0x80;
-  else if (id_dest->width == 2) t0 &= 0x8000;
-  else if (id_dest->width == 4) t0 &= 0x80000000;
+  // 根据位宽精确提取对应的最高符号位
+  if (id_dest->width == 1)      of_bit = (overflow >> 7) & 0x1;
+  else if (id_dest->width == 2) of_bit = (overflow >> 15) & 0x1;
+  else if (id_dest->width == 4) of_bit = (overflow >> 31) & 0x1;
 
-  rtl_msb(&t0, &t0, id_dest->width);
+  // 将算好的 0 或 1 安全装载进 t0，更新 OF
+  rtl_li(&t0, of_bit);
   rtl_set_OF(&t0);
 
   print_asm_template2(cmp);
@@ -139,7 +152,7 @@ make_EHelper(adc) {
   // 3. 第二阶段加法：把 CF 加进去，得到最终结果存入 t2
   rtl_add(&t2, &t2, &t1);
   // 检查第二阶段是否由于加了 CF 再次产生进位
-  rtl_sltu(&t0, &t2, &t1); // t0 = (t2 < CF) ? 1 : 0 (第二阶段的进位)
+  rtl_sltu(&t0, &t2, &t1); 
 
   // 4. 将最终结果写入目标寄存器或内存
   operand_write(id_dest, &t2);
