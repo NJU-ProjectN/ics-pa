@@ -174,7 +174,11 @@ make_DHelper(I2r) {
 }
 
 make_DHelper(mov_I2r) {
-  decode_op_r(eip, id_dest, false);
+  id_dest->type = OP_TYPE_REG;
+  id_dest->reg = decoding.opcode & 0x7;
+  id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
+
+  // 2. 放心让它去读取接下来的 4 字节立即数
   decode_op_I(eip, id_src, true);
 }
 
