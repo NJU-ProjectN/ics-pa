@@ -59,31 +59,32 @@ make_EHelper(sub) {
 }
 
 make_EHelper(cmp) {
-  // 1. 先用标准的 RTL 执行减法，安全得到原始的 32 位结果
-  rtl_sub(&t2, &id_dest->val, &id_src->val);
-  
-  // 2. 标志位计算全部抽取到纯粹的 C 语言局部变量中，彻底断绝全局污染
+  // 1. 提取原始值
   uint32_t dest_val = id_dest->val;
   uint32_t src_val  = id_src->val;
-  uint32_t res_val  = dest_val - src_val; // 原生 C 减法
 
-  // 根据当前操作数的位宽，把高位彻底截断，确保判零（ZF）和符号（SF）完全正确
-  if (id_dest->width == 1) {
-    res_val &= 0xff;
-  } else if (id_dest->width == 2) {
-    res_val &= 0xffff;
-  }
+  // 💥【核心清洗】：在计算任何标志位之前，根据位宽把 dest 和 src 的高位全部清零！
+  uint32_t mask = 0xffffffff;
+  if (id_dest->width == 1)      mask = 0xff;
+  else if (id_dest->width == 2) mask = 0xffff;
 
-  // 将干净的截断结果用标准 RTL 接口传给 t2，用于更新 ZF 和 SF
+  dest_val &= mask;
+  src_val  &= mask;
+
+  // 2. 用清洗后的干净数据进行 C 语言原生计算
+  uint32_t res_val = (dest_val - src_val) & mask;
+
+  // 3. 将干净的差值送入 t2，更新 ZF 和 SF
   rtl_li(&t2, res_val);
   rtl_update_ZFSF(&t2, id_dest->width);
   
-  // 3. CF (无符号借位判断): 保持与 sub 完全纯正一致的逻辑
-  rtl_sltu(&t3, &id_dest->val, &id_src->val);
+  // 4. CF (无符号借位): 此时 dest_val 和 src_val 已经完美截断，直接比较绝无高位干扰
+  uint32_t cf_bit = (dest_val < src_val) ? 1 : 0;
+  rtl_li(&t3, cf_bit);
   rtl_set_CF(&t3);
   
-  // 4. OF (有符号溢出判断): 同样采用纯 C 局部变量计算
-  // 经典的减法溢出逻辑：(dest ^ src) & (dest ^ res)
+  // 5. OF (有符号溢出判断): 
+  // 减法溢出：(dest ^ src) & (dest ^ res)
   uint32_t overflow = (dest_val ^ src_val) & (dest_val ^ res_val);
   uint32_t of_bit = 0;
 
@@ -92,7 +93,6 @@ make_EHelper(cmp) {
   else if (id_dest->width == 2) of_bit = (overflow >> 15) & 0x1;
   else if (id_dest->width == 4) of_bit = (overflow >> 31) & 0x1;
 
-  // 将算好的 0 或 1 安全装载进 t0，更新 OF
   rtl_li(&t0, of_bit);
   rtl_set_OF(&t0);
 
