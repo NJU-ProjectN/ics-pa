@@ -267,14 +267,11 @@ make_DHelper(a2O) {
 make_DHelper(J) {
   decode_op_SI(eip, id_dest, false);
   
-  int32_t offset = 0;
   if (id_dest->width == 1) {
-    offset = (int8_t)(id_dest->simm & 0xFF);
+    id_dest->val = (int32_t)(int8_t)id_dest->simm;
   } else if (id_dest->width == 4) {
-    offset = (int32_t)id_dest->simm;
+    id_dest->val = (int32_t)id_dest->simm;
   }
-
-  decoding.jmp_eip = *eip + offset;
 }
 
 make_DHelper(push_SI) {
