@@ -292,9 +292,18 @@ void exec_wrapper(bool print_flag) {
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
 #endif
   decoding.seq_eip = instr_eip;
+  uint32_t old_esp = cpu.esp;
   printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   exec_real(&decoding.seq_eip);
   printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
+  if (cpu.esp != old_esp) {
+  // 过滤掉正常的 push/pop 系列指令（操作码 0x50-0x5F, 0x6A, 0x68, 0x8F 等）
+  uint8_t op = decoding.opcode;
+  if (!((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8)) {
+        printf("[ALARM ESP CHANGED] EIP: 0x%x, Opcode: 0x%x, ESP 异常从 0x%x 变到了 0x%x！\n", 
+          instr_eip, op, old_esp, cpu.esp);
+  }
+}
 #ifdef DEBUG
   int instr_len = decoding.seq_eip - cpu.eip;
   sprintf(decoding.p, "%*.s", 50 - (12 + 3 * instr_len), "");
