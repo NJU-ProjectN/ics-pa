@@ -162,7 +162,7 @@ make_DHelper(I2E) {
 }
 
 make_DHelper(mov_I2E) {
-  decode_op_rm(eip, id_dest, false, NULL, false);
+  decode_op_rm(eip, id_dest, true, NULL, false);
   decode_op_I(eip, id_src, true);
 }
 
