@@ -216,8 +216,8 @@ make_EHelper(imul1) {
       rtl_sr_w(R_DX, &t1);
       break;
     case 4:
-      rtl_sr_l(R_EDX, &t0);
-      rtl_sr_l(R_EAX, &t1);
+      rtl_sr_l(R_EDX, &t1); 
+      rtl_sr_l(R_EAX, &t0);
       break;
     default: assert(0);
   }
@@ -231,7 +231,7 @@ make_EHelper(imul2) {
   rtl_sext(&id_dest->val, &id_dest->val, id_dest->width);
 
   rtl_imul(&t0, &t1, &id_dest->val, &id_src->val);
-  operand_write(id_dest, &t1);
+  operand_write(id_dest, &t0);
 
   print_asm_template2(imul);
 }
@@ -243,7 +243,7 @@ make_EHelper(imul3) {
   rtl_sext(&id_dest->val, &id_dest->val, id_dest->width);
 
   rtl_imul(&t0, &t1, &id_src2->val, &id_src->val);
-  operand_write(id_dest, &t1);
+  operand_write(id_dest, &t0);
 
   print_asm_template3(imul);
 }
