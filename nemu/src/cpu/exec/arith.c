@@ -61,6 +61,10 @@ make_EHelper(sub) {
 make_EHelper(cmp) {
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   
+  // 💥 关键防护：根据当前操作数位宽，把高位脏数据彻底干掉
+  if (id_dest->width == 1)      t2 &= 0xff;
+  else if (id_dest->width == 2) t2 &= 0xffff;
+
   rtl_update_ZFSF(&t2, id_dest->width);
   
   // CF: 保持与 sub 完全纯正一致的逻辑
