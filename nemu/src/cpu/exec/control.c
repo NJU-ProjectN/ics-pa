@@ -43,12 +43,9 @@ make_EHelper(call) {
   }
   rtlreg_t return_addr = decoding.seq_eip + 5;
 
-  vaddr_t t_eip = cpu.eip + 1;
-  int32_t offset = vaddr_read(t_eip, 4);
-  
   cpu.esp -= 4;
   vaddr_write(cpu.esp, 4, return_addr); 
-
+  int32_t offset = vaddr_read(cpu.eip + 1, 4);
   decoding.jmp_eip = return_addr + offset;
   decoding.is_jmp = 1;
 
