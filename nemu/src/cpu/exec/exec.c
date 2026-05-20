@@ -248,6 +248,9 @@ static make_EHelper(2byte_esc) {
 }
 
 make_EHelper(real) {
+  if (cpu.eip == 0x00100000) {
+    printf("[DEBUG _START] Opcode = 0x%02x\n", decoding.opcode);
+}
   if (cpu.ebp >= 0x08000000) {
     printf("EBP values became insane BEFORE executing EIP = 0x%08x\n", cpu.eip);
     assert(0);
