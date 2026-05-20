@@ -133,6 +133,8 @@ void load_addr(vaddr_t *eip, ModR_M *m, Operand *rm) {
 }
 
 void read_ModR_M(vaddr_t *eip, Operand *rm, bool load_rm_val, Operand *reg, bool load_reg_val) {
+  if (rm != NULL && rm->width == 0) rm->width = decoding.is_operand_size_16 ? 2 : 4;
+  if (reg != NULL && reg->width == 0) reg->width = decoding.is_operand_size_16 ? 2 : 4;
   ModR_M m;
   m.val = instr_fetch(eip, 1);
   decoding.ext_opcode = m.opcode;
