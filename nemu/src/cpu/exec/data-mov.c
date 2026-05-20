@@ -1,9 +1,8 @@
 #include "cpu/exec.h"
 
 make_EHelper(mov) {
-  printf("MOV EIP: 0x%08x, ModRM: %02x, Disp: %d\n", cpu.eip, id_dest->type, id_dest->simm);
-  rtl_li(&t0, id_src->val);
-  operand_write(id_dest, &t0);
+  rtl_mv(&t2, &id_src->val);
+  operand_write(id_dest, &t2);
   
   print_asm_template2(mov);
 }
