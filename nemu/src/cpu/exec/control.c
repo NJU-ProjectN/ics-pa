@@ -41,7 +41,13 @@ make_EHelper(call) {
 
   // 2. 计算跳转目标
   // Target = 返回地址 + 译码出的偏移量
-  int32_t offset = (int32_t)id_dest->val;
+  int32_t offset = id_dest->val;
+  if (id_dest->width == 1) {
+    offset = (int32_t)(int8_t)id_dest->val;
+  } else if (id_dest->width == 2) {
+    offset = (int32_t)(int16_t)id_dest->val;
+  } // 如果是 4 字节，本身就是 32 位完整有符号数，无需处理
+
   decoding.jmp_eip = decoding.seq_eip + offset;
   decoding.is_jmp = 1;
 

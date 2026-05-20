@@ -303,12 +303,14 @@ void exec_wrapper(bool print_flag) {
 #ifdef DIFF_TEST
   uint32_t eip = cpu.eip;
 #endif
+
 #ifdef DEBUG
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ASM: %s\n", 
-          decoding.is_jmp ? decoding.jmp_eip : decoding.seq_eip, cpu.esp, decoding.assembly);
-  #else
+          cpu.eip, cpu.esp, decoding.assembly);
+#else
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
-  #endif
+#endif
+
   update_eip();
   decoding.is_operand_size_16 = false;
 #ifdef DIFF_TEST
