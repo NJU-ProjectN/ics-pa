@@ -248,24 +248,12 @@ static make_EHelper(2byte_esc) {
 }
 
 make_EHelper(real) {
-  memset(&decoding, 0, sizeof(decoding));
-  if (cpu.eip == 0x00100000) {
-    printf("[DEBUG _START] Opcode = 0x%02x\n", decoding.opcode);
-}
-  
-  vaddr_t temp_eip = *eip;
 
   uint32_t opcode = instr_fetch(eip, 1);
   decoding.opcode = opcode; 
   set_width(opcode_table[opcode].width);
   idex(eip, &opcode_table[opcode]);
-if (cpu.ebp >= 0x08000000) {
-    printf("EBP values became insane BEFORE executing EIP = 0x%08x\n", cpu.eip);
-    assert(0);
-} 
-printf("[LEN_CHECK] EIP: 0x%08x | Opcode: 0x%02x | Next_EIP: 0x%08x | Advanced: %d bytes\n", 
-       temp_eip, (uint8_t)opcode, *eip, (int)(*eip - temp_eip));
-       assert(cpu.ebp < 0x08000000);
+
 }
 
 static inline void update_eip(void) {
