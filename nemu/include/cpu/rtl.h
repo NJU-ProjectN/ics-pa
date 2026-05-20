@@ -204,25 +204,19 @@ static inline void rtl_msb(rtlreg_t* dest, const rtlreg_t* src1, int width) {
 }
 
 static inline void rtl_update_ZF(const rtlreg_t* result, int width) {
-  // eflags.ZF <- is_zero(result[width * 8 - 1 .. 0])
-  uint32_t mask = (width == 4) ? 0xffffffff : (1 << (width * 8)) - 1;
+  uint32_t mask = 0;
+  if (width == 1)      mask = 0xff;
+  else if (width == 2) mask = 0xffff;
+  else if (width == 4) mask = 0xffffffff;
   
-  if ((*result & mask) == 0) {
-    cpu.eflags |= (1 << 6);
-  } else {
-    cpu.eflags &= ~(1 << 6); // ZF 清 0
-  }
-}//random comment
+  rtlreg_t zf = ((*result & mask) == 0);
+  rtl_set_ZF(&zf); // 借用你定义的专用设置函数，让它内部去处理结构体位域或位移！
+}
 
 static inline void rtl_update_SF(const rtlreg_t* result, int width) {
-  // eflags.SF <- is_sign(result[width * 8 - 1 .. 0])
-  uint32_t sign_mask = 1 << (width * 8 - 1);
-  
-  if ((*result & sign_mask) != 0) {
-    cpu.eflags |= (1 << 7);
-  } else {
-    cpu.eflags &= ~(1 << 7); 
-  }
+  rtlreg_t sf;
+  rtl_msb(&sf, result, width); // 直接复用你刚才写得非常棒的 rtl_msb！
+  rtl_set_SF(&sf);             // 借用专用设置函数，打通和 jcc 的数据通路
 }
 
 static inline void rtl_update_ZFSF(const rtlreg_t* result, int width) {
