@@ -10,9 +10,9 @@ make_EHelper(jmp) {
 
 make_EHelper(jcc) {
   uint8_t subcode = decoding.opcode & 0xf;
-  rtl_setcc(&t2, subcode); // 不要 >> 1 ！！！
+  rtl_setcc(&t2, subcode); 
   
-  // 打印如果报错可以暂时不管，核心是跳对！
+
   print_asm("jcc %x", decoding.seq_eip + id_dest->val); 
   
   if (t2) {
