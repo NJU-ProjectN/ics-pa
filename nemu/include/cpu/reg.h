@@ -15,34 +15,46 @@ enum { R_AL, R_CL, R_DL, R_BL, R_AH, R_CH, R_DH, R_BH };
  */
 
 typedef struct {
-  union{
-    struct{
-     union{
-        uint32_t _32;
-        uint16_t _16;
-        uint8_t _8[2];
-      }gpr[8];
-    };
+    union {
+        // 这一层 union 包含 gpr 数组，用于下标访问
+        union {
+            uint32_t _32;
+            uint16_t _16;
+            uint8_t _8[4];
+        } gpr[8];
 
-  /* Do NOT change the order of the GPRs' definitions. */
-
-  /* In NEMU, rtlreg_t is exactly uint32_t. This makes RTL instructions
-   * in PA2 able to directly access these registers.
-   */
-    struct {
-      rtlreg_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
+        // 这一层 struct 包含具名寄存器，用于直接访问
+        struct {
+            uint32_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
+        };
     };
-  };
-  vaddr_t eip;
-  uint32_t eflags;
+    vaddr_t eip;
+    uint32_t eflags;
 } CPU_state;
 
 extern CPU_state cpu;
+
+#define R_EAX 0
+#define R_ECX 1
+#define R_EDX 2
+#define R_EBX 3
+#define R_ESP 4
+#define R_EBP 5
+#define R_ESI 6
+#define R_EDI 7
 
 static inline int check_reg_index(int index) {
   assert(index >= 0 && index < 8);
   return index;
 }
+// 提供一个访问器，确保译码器永远访问的是同一块物理内存
+static inline rtlreg_t* reg_l(int index) {
+  // 显式指向联合体内部的 ._32 成员，这样返回的指针就是 uint32_t *
+  return &cpu.gpr[check_reg_index(index)]._32;
+}
+
+
+
 
 #define reg_l(index) (cpu.gpr[check_reg_index(index)]._32)
 #define reg_w(index) (cpu.gpr[check_reg_index(index)]._16)
