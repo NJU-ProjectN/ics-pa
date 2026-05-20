@@ -32,7 +32,9 @@ make_EHelper(jmp_rm) {
 
 make_EHelper(call) {
     // push 返回地址
-    rtl_push(&decoding.seq_eip);
+    printf("DEBUG: Call: pushing ret addr 0x%08x\n", decoding.seq_eip);
+    rtlreg_t ret_addr = decoding.seq_eip; 
+    rtl_push(&ret_addr);
 
     decoding.jmp_eip = decoding.seq_eip + (int32_t)id_dest->val;
     decoding.is_jmp = 1;
