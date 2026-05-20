@@ -73,10 +73,13 @@ void load_addr(vaddr_t *eip, ModR_M *m, Operand *rm) {
    */
 
   if (disp_size != 0) {
-    disp = instr_fetch(eip, disp_size);
-
     if (disp_size == 1) {
-      disp = (int8_t)disp;
+      // 强迫 instr_fetch 出来的 uint32_t 先变成真正的有符号 8 位数，
+      // 再由编译器安全地符号扩展到 32 位的 int32_t
+      disp = (int8_t)instr_fetch(eip, 1);
+    }
+    else if (disp_size == 4) {
+      disp = (int32_t)instr_fetch(eip, 4);
     }
   }
 
