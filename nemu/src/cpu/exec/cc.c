@@ -11,33 +11,34 @@ void rtl_setcc(rtlreg_t* dest, uint8_t subcode) {
     CC_L, CC_NL, CC_LE, CC_NLE
   };
 
-  // TODO: Query EFLAGS to determine whether the condition code is satisfied.
-  // dest <- ( cc is satisfied ? 1 : 0)
+  // 💥【核心修复】：彻底删掉这里的 rtlreg_t t0 = 0, t1 = 0;
+  // 直接无脑使用全局声明的 t0, t1。千万不要在这里带类型重新声明！
+
   switch (subcode & 0xe) {
-    case CC_O: // 对应 O 和 NO
+    case CC_O: 
       rtl_get_OF(dest);
       break;
-    case CC_B: // 对应 B 和 NB (jc / jnc)
+    case CC_B: 
       rtl_get_CF(dest);
       break;
-    case CC_E: // 对应 E 和 NE (je / jne)
+    case CC_E: 
       rtl_get_ZF(dest);
       break;
-    case CC_BE: // 对应 BE 和 NBE (jbe / jnbe)
+    case CC_BE: 
       // 条件是：CF == 1 或 ZF == 1
       rtl_get_CF(&t0);
       rtl_get_ZF(&t1);
       rtl_or(dest, &t0, &t1);
       break;
-    case CC_S: // 对应 S 和 NS
+    case CC_S: 
       rtl_get_SF(dest);
       break;
-    case CC_L: // 对应 L 和 NL (jl / jnl)
+    case CC_L: 
       rtl_get_SF(&t0);
       rtl_get_OF(&t1);
       rtl_xor(dest, &t0, &t1);
       break;
-    case CC_LE: // 对应 LE 和 NLE (jle / jnle)
+    case CC_LE: 
       rtl_get_SF(&t0);
       rtl_get_OF(&t1);
       rtl_xor(&t0, &t0, &t1); // t0 = SF ^ OF
