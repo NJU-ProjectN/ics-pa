@@ -8,6 +8,7 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
+  /*
     rtlreg_t val;
 
     if (id_src->type == OP_TYPE_MEM) {
@@ -20,12 +21,22 @@ make_EHelper(push) {
     rtl_push(&val);
     printf("[DEBUG PUSH] After: ESP=0x%08x\n", cpu.esp);
     print_asm_template1(push);
+    */
+  cpu.esp -= 4;
+  vaddr_write(cpu.esp, 4, id_src->val); // 直接用 vaddr_write
+  print_asm_template1(push);
 }
 
 make_EHelper(pop) {
+  /*
   rtl_pop(&t0);
   operand_write(id_dest, &t0);
 
+  print_asm_template1(pop);
+  */
+ rtlreg_t val = vaddr_read(cpu.esp, 4);
+  cpu.esp += 4;
+  operand_write(id_dest, &val);
   print_asm_template1(pop);
 }
 
