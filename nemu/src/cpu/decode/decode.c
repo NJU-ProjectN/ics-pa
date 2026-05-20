@@ -149,6 +149,7 @@ make_DHelper(I2a) {
  * use for imul */
 make_DHelper(I_E2G) {
   decode_op_rm(eip, id_src2, true, id_dest, false);
+  id_src->width = id_dest->width;
   decode_op_I(eip, id_src, true);
 }
 
@@ -212,21 +213,15 @@ make_DHelper(test_I) {
 make_DHelper(SI2E) {
   assert(id_dest->width == 2 || id_dest->width == 4);
   decode_op_rm(eip, id_dest, true, NULL, false);
-  id_src->width = 1;
+  id_src->width = id_dest->width;
   decode_op_SI(eip, id_src, true);
-  if (id_dest->width == 2) {
-    id_src->val &= 0xffff;
-  }
 }
 
 make_DHelper(SI_E2G) {
   assert(id_dest->width == 2 || id_dest->width == 4);
   decode_op_rm(eip, id_src2, true, id_dest, false);
-  id_src->width = 1;
+  id_src->width = id_dest->width;
   decode_op_SI(eip, id_src, true);
-  if (id_dest->width == 2) {
-    id_src->val &= 0xffff;
-  }
 }
 
 make_DHelper(gp2_1_E) {
@@ -280,17 +275,8 @@ make_DHelper(J) {
 }
 
 make_DHelper(push_SI) {
+  id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
   decode_op_SI(eip, id_dest, true);
-  int32_t offset = 0;
-  if (id_dest->width == 1) {
-    offset = (int8_t)id_dest->simm;
-  } else if (id_dest->width == 2) {
-    offset = (int16_t)id_dest->simm;
-  } else {
-    offset = (int32_t)id_dest->simm;
-  }
-
-  decoding.jmp_eip = *eip + offset;
 }
 
 make_DHelper(in_I2a) {
