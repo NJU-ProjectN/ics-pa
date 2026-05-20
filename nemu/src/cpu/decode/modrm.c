@@ -4,87 +4,128 @@
 void load_addr(vaddr_t *eip, ModR_M *m, Operand *rm) {
   assert(m->mod != 3);
 
-  int32_t disp = 0;
-  int disp_size = 4;
-  int base_reg = -1, index_reg = -1, scale = 0;
-  rtl_li(&rm->addr, 0);
+  int base_reg  = -1;
+  int index_reg = -1;
+  int scale     = 0;
+
+  int disp_size = 0;
+  int32_t disp  = 0;
+
+  /*
+   * Step 1:
+   * parse ModR/M and SIB
+   */
 
   if (m->R_M == R_ESP) {
+    // has SIB
     SIB s;
     s.val = instr_fetch(eip, 1);
-    base_reg = s.base;
+
     scale = s.ss;
-    if (s.index != R_ESP) { index_reg = s.index; }
-    
-    // 🟢 特殊处理：如果是 mod=0 且 base=5，则没有基址寄存器，是一个 disp32
-    if (m->mod == 0 && base_reg == 5) {
-      base_reg = -1; 
-      // disp_size 保持为 4 (即 disp32)
+
+    // index = 4 means no index
+    if (s.index != R_ESP) {
+      index_reg = s.index;
+    }
+
+    /*
+     * SIB special case:
+     * mod = 0 && base = 5
+     * => disp32 only, no base register
+     */
+    if (m->mod == 0 && s.base == R_EBP) {
+      base_reg = -1;
+      disp_size = 4;
+    }
+    else {
+      base_reg = s.base;
     }
   }
   else {
-    base_reg = m->R_M;
-    // 🟢 特殊处理：如果是 mod=0 且 R_M=5，也是 disp32
-    if (m->mod == 0 && base_reg == R_EBP) { base_reg = -1; }
-    else { disp_size = 0; }
+    /*
+     * normal ModR/M
+     */
+    if (m->mod == 0 && m->R_M == R_EBP) {
+      // disp32 only
+      base_reg = -1;
+      disp_size = 4;
+    }
+    else {
+      base_reg = m->R_M;
+    }
   }
 
-  if (m->mod == 0) {
-  if (m->R_M != R_ESP) { 
-    if (base_reg == R_EBP) { base_reg = -1; }
-    else { disp_size = 0; }
+  /*
+   * Step 2:
+   * determine displacement size
+   */
+
+  if (m->mod == 1) {
+    disp_size = 1;
   }
+  else if (m->mod == 2) {
+    disp_size = 4;
   }
-  else if (m->mod == 1) { 
-    disp_size = 1; 
-  }
-  else if (m->mod == 2) { 
-    disp_size = 4; 
-  }
+
+  /*
+   * Step 3:
+   * fetch displacement
+   */
 
   if (disp_size != 0) {
-    /* has disp */
     disp = instr_fetch(eip, disp_size);
-    if (disp_size == 1) { disp = (int8_t)disp; }
 
-    rtl_addi(&rm->addr, &rm->addr, disp);
+    if (disp_size == 1) {
+      disp = (int8_t)disp;
+    }
   }
+
+  /*
+   * Step 4:
+   * calculate effective address
+   */
+
+  rtl_li(&rm->addr, disp);
 
   if (base_reg != -1) {
     rtl_add(&rm->addr, &rm->addr, &reg_l(base_reg));
   }
 
   if (index_reg != -1) {
-    rtl_shli(&t0, &reg_l(index_reg), scale);
-    rtl_add(&rm->addr, &rm->addr, &t0);
+    rtlreg_t t;
+    rtl_shli(&t, &reg_l(index_reg), scale);
+    rtl_add(&rm->addr, &rm->addr, &t);
   }
 
 #ifdef DEBUG
-  char disp_buf[16];
-  char base_buf[8];
-  char index_buf[8];
+  char disp_buf[32]  = "";
+  char base_buf[16]  = "";
+  char index_buf[32] = "";
 
-  if (disp_size != 0) {
-    /* has disp */
-    sprintf(disp_buf, "%s%#x", (disp < 0 ? "-" : ""), (disp < 0 ? -disp : disp));
+  if (disp_size != 0 || (base_reg == -1 && index_reg == -1)) {
+    sprintf(disp_buf, "%#x", disp);
   }
-  else { disp_buf[0] = '\0'; }
 
-  if (base_reg == -1) { base_buf[0] = '\0'; }
-  else { 
+  if (base_reg != -1) {
     sprintf(base_buf, "%%%s", reg_name(base_reg, 4));
   }
 
-  if (index_reg == -1) { index_buf[0] = '\0'; }
-  else { 
-    sprintf(index_buf, ",%%%s,%d", reg_name(index_reg, 4), 1 << scale);
+  if (index_reg != -1) {
+    sprintf(index_buf,
+            ",%%%s,%d",
+            reg_name(index_reg, 4),
+            1 << scale);
   }
 
   if (base_reg == -1 && index_reg == -1) {
     sprintf(rm->str, "%s", disp_buf);
   }
   else {
-    sprintf(rm->str, "%s(%s%s)", disp_buf, base_buf, index_buf);
+    sprintf(rm->str,
+            "%s(%s%s)",
+            disp_buf,
+            base_buf,
+            index_buf);
   }
 #endif
 
