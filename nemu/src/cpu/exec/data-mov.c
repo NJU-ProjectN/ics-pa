@@ -1,8 +1,6 @@
 #include "cpu/exec.h"
 
 make_EHelper(mov) {
-  // 🟢 必须读取源操作数的值，确保它已经被 decode 到了 id_src->val 中
-  // 这里的 id_src->val 已经是 operand_read(id_src) 后的结果
   rtl_li(&t0, id_src->val);
   operand_write(id_dest, &t0);
   
