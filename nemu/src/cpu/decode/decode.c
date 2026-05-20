@@ -162,6 +162,9 @@ make_DHelper(I2E) {
 }
 
 make_DHelper(mov_I2E) {
+  int width = decoding.is_operand_size_16 ? 2 : 4;
+  id_dest->width = width;
+  id_src->width = width;
   decode_op_rm(eip, id_dest, true, NULL, false);
   decode_op_I(eip, id_src, true);
 }
