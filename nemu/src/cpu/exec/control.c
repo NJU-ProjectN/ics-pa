@@ -15,9 +15,11 @@ make_EHelper(jcc) {
   if (invert) {
     rtl_xori(&t2, &t2, 1); // 或者是 t2 = !t2; 
   }
-  decoding.is_jmp = t2;
+  if (t2) {
+    rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
+  }
 
-  print_asm("j%s %x", get_cc_name(subcode), decoding.jmp_eip);
+  print_asm("j%s %x", get_cc_name(subcode >> 1), decoding.seq_eip + id_dest->val);
 }
 
 make_EHelper(jmp_rm) {
