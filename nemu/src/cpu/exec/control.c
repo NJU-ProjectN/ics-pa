@@ -38,15 +38,14 @@ make_EHelper(jmp_rm) {
 }
 
 make_EHelper(call) {
-  if (cpu.esp < 0x100000) {
-    cpu.esp = 0x00800000;
-  }
-  rtlreg_t return_addr = decoding.seq_eip + 5;
-
+  rtlreg_t return_addr = decoding.seq_eip;
+  
   cpu.esp -= 4;
-  vaddr_write(cpu.esp, 4, return_addr); 
-  int32_t offset = vaddr_read(cpu.eip + 1, 4);
-  decoding.jmp_eip = return_addr + offset;
+  vaddr_write(cpu.esp, 4, return_addr);
+
+  // 2. 计算跳转目标
+  // Target = 返回地址 + 译码出的偏移量
+  decoding.jmp_eip = decoding.seq_eip + id_dest->val;
   decoding.is_jmp = 1;
 
   print_asm("call %x", decoding.jmp_eip);
