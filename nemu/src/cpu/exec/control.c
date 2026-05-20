@@ -43,6 +43,12 @@ make_EHelper(call) {
 make_EHelper(ret) {
     rtlreg_t target_eip;
     rtl_pop(&target_eip);   // pop 返回地址
+    printf("[DEBUG] RET: Popping target_eip = 0x%08x, current_esp = 0x%08x\n", target_eip, cpu.esp);
+    
+    // 如果弹出的值不符合代码段范围（通常是 0x00100000 左右），直接报错
+    if (target_eip < 0x00100000) { 
+        panic("RET 弹出了非法地址！检查谁压入了该值");
+    }
     decoding.jmp_eip = target_eip;
     decoding.is_jmp = 1;
 
