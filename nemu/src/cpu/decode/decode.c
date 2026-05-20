@@ -211,17 +211,34 @@ make_DHelper(test_I) {
 }
 
 make_DHelper(SI2E) {
-  assert(id_dest->width == 2 || id_dest->width == 4);
+assert(id_dest->width == 2 || id_dest->width == 4);
+  // 1. 解析目标操作数（如 %esp），它会把 id_dest->width 设为 4
   decode_op_rm(eip, id_dest, true, NULL, false);
-  id_src->width = id_dest->width;
+  
+  // 2. 【核心纠正】：不管目标多宽，内存里的立即数永远只有 1 字节！
+  id_src->width = 1; 
+  
+  // 3. 调用你的 decode_op_SI，此时它会精准走 width == 1 分支，只读 1 字节！
   decode_op_SI(eip, id_src, true);
+  
+  // 4. 【关键对齐】：虽然只读了 1 字节，但我们需要让后续的执行期（如 sub 逻辑）
+  // 知道这个操作数现在已经成功符号扩展到了和目标相同的 32 位宽度。
+  id_src->width = id_dest->width;
 }
 
 make_DHelper(SI_E2G) {
   assert(id_dest->width == 2 || id_dest->width == 4);
+  // 1. 解析 ModR/M
   decode_op_rm(eip, id_src2, true, id_dest, false);
-  id_src->width = id_dest->width;
+  
+  // 2. 【核心纠正】：内存里的立即数锁死为 1 字节
+  id_src->width = 1;
+  
+  // 3. 精准读取 1 字节并完成符号扩展
   decode_op_SI(eip, id_src, true);
+  
+  // 4. 宽度对齐
+  id_src->width = id_dest->width;
 }
 
 make_DHelper(gp2_1_E) {
