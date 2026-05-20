@@ -33,6 +33,7 @@ make_EHelper(shr);
 make_EHelper(sar);
 make_EHelper(leave);
 make_EHelper(cltd);
+make_EHelper(idiv);
 
 typedef struct {
   DHelper decode;
@@ -84,7 +85,7 @@ make_group(gp2,
 
   /* 0xf6, 0xf7 */
 make_group(gp3,
-    EX(test), EX(test), EMPTY, EMPTY,
+    EX(test), EX(idiv), EMPTY, EMPTY,
     EMPTY, EMPTY, EMPTY, EMPTY)
 
   /* 0xfe */
