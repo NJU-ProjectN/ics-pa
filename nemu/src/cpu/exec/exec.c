@@ -288,8 +288,9 @@ void exec_wrapper(bool print_flag) {
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
 #endif
   decoding.seq_eip = cpu.eip;
+  printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   exec_real(&decoding.seq_eip);
-
+  printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
 #ifdef DEBUG
   int instr_len = decoding.seq_eip - cpu.eip;
   sprintf(decoding.p, "%*.s", 50 - (12 + 3 * instr_len), "");
