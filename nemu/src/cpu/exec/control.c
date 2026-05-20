@@ -31,40 +31,27 @@ make_EHelper(jmp_rm) {
 }
 
 make_EHelper(call) {
-  rtlreg_t return_addr = decoding.seq_eip;
-  
-  cpu.esp -= 4;
-  if (cpu.esp < 0x7000 || cpu.esp > 0x8000) {
-    panic("Stack pointer corrupted! ESP: 0x%08x", cpu.esp);
-}
-  vaddr_write(cpu.esp, 4, return_addr);
+    // push 返回地址
+    rtl_push(&decoding.seq_eip);
 
-  // 2. 计算跳转目标
-  // Target = 返回地址 + 译码出的偏移量
-  int32_t offset = id_dest->val;
-  if (id_dest->width == 1) {
-    offset = (int32_t)(int8_t)id_dest->val;
-  } else if (id_dest->width == 2) {
-    offset = (int32_t)(int16_t)id_dest->val;
-  } // 如果是 4 字节，本身就是 32 位完整有符号数，无需处理
+    // 计算跳转目标
+    int32_t offset = id_dest->val;
+    if (id_dest->width == 1) offset = (int32_t)(int8_t)id_dest->val;
+    else if (id_dest->width == 2) offset = (int32_t)(int16_t)id_dest->val;
 
-  decoding.jmp_eip = decoding.seq_eip + offset;
-  decoding.is_jmp = 1;
+    decoding.jmp_eip = decoding.seq_eip + offset;
+    decoding.is_jmp = 1;
 
-  print_asm("call %x", decoding.jmp_eip);
+    print_asm("call %x", decoding.jmp_eip);
 }
 
 make_EHelper(ret) {
-  if (cpu.esp < 0x7000 || cpu.esp > 0x8000) {
-    panic("Stack pointer corrupted! ESP: 0x%08x", cpu.esp);
-}
-  rtlreg_t target_eip = vaddr_read(cpu.esp, 4);
-  printf("[RET REAL] Current ESP: 0x%08x, Value in Stack: 0x%08x\n", cpu.esp, target_eip);
-  cpu.esp += 4;
-  decoding.jmp_eip = target_eip;
-  decoding.is_jmp = 1;
+    rtlreg_t target_eip;
+    rtl_pop(&target_eip);   // pop 返回地址
+    decoding.jmp_eip = target_eip;
+    decoding.is_jmp = 1;
 
-  print_asm("ret");
+    print_asm("ret");
 }
 
 make_EHelper(call_rm) {

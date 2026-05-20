@@ -185,15 +185,9 @@ static inline void rtl_push(const rtlreg_t* src1) {
   }
 }
 
-static inline void rtl_pop(rtlreg_t* dest) {
-  printf("[DEBUG POP] Before: ESP=0x%08x\n", cpu.esp);
-  // dest <- M[esp]
-  // esp <- esp + 4
-  uint32_t val_in_mem = vaddr_read(cpu.esp, 4);
-  printf("[AUDIT POP] Reading from ESP=0x%08x, Memory holds: 0x%08x\n", cpu.esp, val_in_mem);
-  rtl_lm(dest, &cpu.esp, 4);
-  rtl_addi(&cpu.esp, &cpu.esp, 4);
-  printf("[DEBUG POP] After: ESP=0x%08x, Val=0x%08x\n", cpu.esp, *dest);
+static inline void rtl_pop(rtlreg_t *dest) {
+    rtl_lm(dest, &cpu.esp, 4);
+    cpu.esp += 4;
 }
 
 static inline void rtl_eq0(rtlreg_t* dest, const rtlreg_t* src1) {

@@ -8,39 +8,23 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
-  /*
-    rtlreg_t val;
-
+    rtlreg_t val = (id_src->type == OP_TYPE_MEM) ? 0 : id_src->val;
     if (id_src->type == OP_TYPE_MEM) {
         rtl_lm(&val, &id_src->addr, id_src->width);
     }
-    else {
-        val = id_src->val;
-    }
-     printf("[DEBUG PUSH] Before: ESP=0x%08x\n", cpu.esp);
+
+    // 执行统一的 push
     rtl_push(&val);
-    printf("[DEBUG PUSH] After: ESP=0x%08x\n", cpu.esp);
+
     print_asm_template1(push);
-    */
-  printf("[DEBUG PUSH] Before: ESP=0x%08x\n", cpu.esp);
-  cpu.esp -= 4;
-  
-  vaddr_write(cpu.esp, 4, id_src->val); // 直接用 vaddr_write
-  printf("[DEBUG PUSH] After: ESP=0x%08x\n", cpu.esp);
-  print_asm_template1(push);
 }
 
 make_EHelper(pop) {
-  /*
-  rtl_pop(&t0);
-  operand_write(id_dest, &t0);
+    rtlreg_t val;
+    rtl_pop(&val);            // 统一 pop
+    operand_write(id_dest, &val);
 
-  print_asm_template1(pop);
-  */
- rtlreg_t val = vaddr_read(cpu.esp, 4);
-  cpu.esp += 4;
-  operand_write(id_dest, &val);
-  print_asm_template1(pop);
+    print_asm_template1(pop);
 }
 
 make_EHelper(pusha) {
