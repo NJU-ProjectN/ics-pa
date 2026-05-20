@@ -257,6 +257,7 @@ make_EHelper(real) {
 
 printf("[LEN_CHECK] EIP: 0x%08x | Opcode: 0x%02x | Next_EIP: 0x%08x | Advanced: %d bytes\n", 
        temp_eip, (uint8_t)opcode, *eip, (int)(*eip - temp_eip));
+       assert(cpu.ebp < 0x08000000);
 }
 
 static inline void update_eip(void) {
