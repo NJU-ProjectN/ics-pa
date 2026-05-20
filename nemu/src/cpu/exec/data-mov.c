@@ -146,8 +146,6 @@ make_EHelper(movzx) {
 }
 
 make_EHelper(lea) {
-  printf("[DEBUG LEA] addr: 0x%x\n", id_src->addr);
-  
   rtl_li(&t0, id_src->addr);
   operand_write(id_dest, &t0);
   
