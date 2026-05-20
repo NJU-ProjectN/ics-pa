@@ -175,6 +175,16 @@ make_EHelper(mul) {
 
   print_asm_template1(mul);
 }
+make_EHelper(imul) {
+  // 1. 拿到目标操作数（dest，这里是 %edx）和源操作数（src，这里是 %ecx）的值
+  // 2. 直接做 32 位乘法（C 语言会自动做低位截断）
+  uint32_t result = id_dest->val * id_src->val;
+
+  // 3. 将结果写回目标寄存器（dest）
+  operand_write(id_dest, &result);
+
+  print_asm_template2(imul);
+}
 
 // imul with one operand
 make_EHelper(imul1) {
