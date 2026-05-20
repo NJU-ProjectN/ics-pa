@@ -28,10 +28,6 @@ make_EHelper(jmp_rm);
 make_EHelper(call_rm);
 make_EHelper(not);
 make_EHelper(movzx);
-make_EHelper(rol);
-make_EHelper(ror);
-make_EHelper(rcl);
-make_EHelper(rcr);
 make_EHelper(shl);
 make_EHelper(shr);
 make_EHelper(sar);
@@ -81,7 +77,7 @@ make_group(gp1,
 
   /* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
 make_group(gp2,
-    EX(rol), EX(ror), EX(rcl), EX(rcr),
+    EMPTY, EMPTY, EMPTY, EMPTY,
     EX(shl), EX(shr), EMPTY, EX(sar))
 
   /* 0xf6, 0xf7 */
