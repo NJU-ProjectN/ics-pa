@@ -124,23 +124,35 @@ make_EHelper(neg) {
 }
 
 make_EHelper(adc) {
+  // 1. 获取当前的进位 CF
+  rtl_get_CF(&t1); // t1 = CF
+
+  // 2. 第一阶段加法：t2 = dest + src
   rtl_add(&t2, &id_dest->val, &id_src->val);
-  rtl_sltu(&t3, &t2, &id_dest->val);
-  rtl_get_CF(&t1);
+  // 检查第一阶段是否溢出/进位
+  rtl_sltu(&t3, &t2, &id_dest->val); // t3 = (t2 < dest) ? 1 : 0 (第一阶段的进位)
+
+  // 3. 第二阶段加法：把 CF 加进去，得到最终结果存入 t2
   rtl_add(&t2, &t2, &t1);
+  // 检查第二阶段是否由于加了 CF 再次产生进位
+  rtl_sltu(&t0, &t2, &t1); // t0 = (t2 < CF) ? 1 : 0 (第二阶段的进位)
+
+  // 4. 将最终结果写入目标寄存器或内存
   operand_write(id_dest, &t2);
 
+  // 5. 更新零标志位（ZF）和符号标志位（SF）
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  rtl_sltu(&t0, &t2, &id_dest->val);
+  // 6. 更新进位标志位（CF）：两阶段任何一阶段产生进位，最终 CF 就是 1
   rtl_or(&t0, &t3, &t0);
   rtl_set_CF(&t0);
 
+  // 7. 更新溢出标志位（OF）：两源操作数符号相同，但与最终结果符号不同，则溢出
   rtl_xor(&t0, &id_dest->val, &id_src->val);
-  rtl_not(&t0);
-  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_not(&t0); // 如果 dest 和 src 符号相同，t0 的最高位为 1
+  rtl_xor(&t1, &id_dest->val, &t2); // 如果 dest 和 最终结果 符号不同，t1 的最高位为 1
   rtl_and(&t0, &t0, &t1);
-  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_msb(&t0, &t0, id_dest->width); // 取出最高位
   rtl_set_OF(&t0);
 
   print_asm_template2(adc);
