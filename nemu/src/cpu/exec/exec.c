@@ -58,9 +58,9 @@ static inline void set_width(int width) {
 static inline void idex(vaddr_t *eip, opcode_entry *e) {
   /* eip is pointing to the byte next to opcode */
   if (e->decode){
-    printf("DEBUG: Before Decode eip=0x%08x\n", *eip);
+    //printf("DEBUG: Before Decode eip=0x%08x\n", *eip);
     e->decode(eip);
-    printf("DEBUG: After Decode eip=0x%08x\n", *eip);
+    //printf("DEBUG: After Decode eip=0x%08x\n", *eip);
   }
   decoding.seq_eip = *eip;
   e->execute(eip);
@@ -295,9 +295,9 @@ void exec_wrapper(bool print_flag) {
 #endif
   decoding.seq_eip = instr_eip;
   uint32_t old_esp = cpu.esp;
-  printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
+  //printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   exec_real(&decoding.seq_eip);
-  printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
+  //printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   if (cpu.esp != old_esp) {
   // 过滤掉正常的 push/pop 系列指令（操作码 0x50-0x5F, 0x6A, 0x68, 0x8F 等）
   uint8_t op = decoding.opcode;
@@ -321,10 +321,10 @@ void exec_wrapper(bool print_flag) {
 #endif
 
 #ifdef DEBUG
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
-    cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
+  //printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
+  //  cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
 #else
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
+  //printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
 #endif
 
   update_eip();

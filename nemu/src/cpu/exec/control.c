@@ -14,7 +14,7 @@ make_EHelper(jcc) {
   rtl_setcc(&t2, subcode); 
   printf("[DEBUG JCC] opcode=0x%x, subcode=%d, t2_result=%d, dest_val=0x%x, target=0x%x\n", 
           decoding.opcode, subcode, t2, id_dest->val, decoding.seq_eip + id_dest->val);
-          
+
   if (t2) {
     decoding.jmp_eip = decoding.seq_eip + id_dest->val;
     decoding.is_jmp = 1;
@@ -55,7 +55,7 @@ make_EHelper(call) {
 make_EHelper(ret) {
     rtlreg_t target_eip;
     rtl_pop(&target_eip);   // pop 返回地址
-    printf("[DEBUG] RET: Popping target_eip = 0x%08x, current_esp = 0x%08x\n", target_eip, cpu.esp);
+    //printf("[DEBUG] RET: Popping target_eip = 0x%08x, current_esp = 0x%08x\n", target_eip, cpu.esp);
     
     // 如果弹出的值不符合代码段范围（通常是 0x00100000 左右），直接报错
     if (target_eip < 0x00100000) { 
