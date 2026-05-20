@@ -43,21 +43,11 @@ static inline int check_reg_index(int index) {
   assert(index >= 0 && index < 8);
   return index;
 }
-/*
+
 #define reg_l(index) (cpu.gpr[check_reg_index(index)]._32)
 #define reg_w(index) (cpu.gpr[check_reg_index(index)]._16)
 #define reg_b(index) (cpu.gpr[check_reg_index(index) & 0x3]._8[index >> 2])
-*/
-#define reg_l(index) (cpu.gpr[({ assert(index >= 0 && index < 8); index; })]._32)
-#define reg_w(index) (cpu.gpr[({ assert(index >= 0 && index < 8); index; })]._16)
-#define reg_b(index) (cpu.gpr[({ \
-  assert(index >= 0 && index < 8); \
-  index & 0x3; \
-})]._8[({ \
-  int _sub = index >> 2; \
-  assert(_sub == 0 || _sub == 1); \
-  _sub; \
-})])
+
 extern const char* regsl[];
 extern const char* regsw[];
 extern const char* regsb[];
