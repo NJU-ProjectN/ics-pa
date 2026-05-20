@@ -134,23 +134,16 @@ make_EHelper(cwtl) {
 }
 
 make_EHelper(movsx) {
-  id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
   rtl_sext(&t2, &id_src->val, id_src->width);
   operand_write(id_dest, &t2);
   print_asm_template2(movsx);
 }
 
 make_EHelper(movzx) {
-id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
-
-  uint32_t val = id_src->val;
-  if (id_src->width == 1) {
-    val = (uint8_t)val;  
-  } else if (id_src->width == 2) {
-    val = (uint16_t)val; 
-  }
-
-  operand_write(id_dest, &val);
+  uint32_t mask = (id_src->width == 1) ? 0xff : 0xffff;
+  t2 = id_src->val & mask;
+  operand_write(id_dest, &t2); 
+  
   print_asm_template2(movzx);
 }
 

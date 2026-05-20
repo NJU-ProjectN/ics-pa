@@ -209,10 +209,10 @@ opcode_entry opcode_table [512] = {
   /* 0x84 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x88 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0x8c */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0x90 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
-  /* 0x94 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
-  /* 0x98 */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
-  /* 0x9c */	IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc), IDEX(E, setcc),
+  /* 0x90 */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
+  /* 0x94 */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
+  /* 0x98 */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
+  /* 0x9c */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
   /* 0xa0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
@@ -248,6 +248,10 @@ static make_EHelper(2byte_esc) {
 }
 
 make_EHelper(real) {
+  if (cpu.ebp >= 0x08000000) {
+    printf("EBP values became insane BEFORE executing EIP = 0x%08x\n", cpu.eip);
+    assert(0);
+}
   vaddr_t temp_eip = *eip;
 
   uint32_t opcode = instr_fetch(eip, 1);
