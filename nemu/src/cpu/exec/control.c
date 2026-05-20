@@ -34,6 +34,9 @@ make_EHelper(call) {
   rtlreg_t return_addr = decoding.seq_eip;
   
   cpu.esp -= 4;
+  if (cpu.esp < 0x7000 || cpu.esp > 0x8000) {
+    panic("Stack pointer corrupted! ESP: 0x%08x", cpu.esp);
+}
   vaddr_write(cpu.esp, 4, return_addr);
 
   // 2. 计算跳转目标
@@ -46,6 +49,9 @@ make_EHelper(call) {
 }
 
 make_EHelper(ret) {
+  if (cpu.esp < 0x7000 || cpu.esp > 0x8000) {
+    panic("Stack pointer corrupted! ESP: 0x%08x", cpu.esp);
+}
   rtlreg_t target_eip = vaddr_read(cpu.esp, 4);
   printf("[RET REAL] Current ESP: 0x%08x, Value in Stack: 0x%08x\n", cpu.esp, target_eip);
   cpu.esp += 4;
