@@ -1,8 +1,9 @@
 #include "cpu/exec.h"
 
 make_EHelper(jmp) {
-  // the target address is calculated at the decode stage
-rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
+  // jmp 是无条件跳转
+  decoding.jmp_eip = decoding.seq_eip + id_dest->val;
+  decoding.is_jmp = 1;
 
   print_asm_template1(jmp);
 }
@@ -18,7 +19,12 @@ make_EHelper(jcc) {
     rtl_xori(&t2, &t2, 1);
   }
   if (t2) {
-    rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
+    // 条件成立：用整条指令彻底解析完后的下一条地址 seq_eip + 相对偏移量
+    decoding.jmp_eip = decoding.seq_eip + id_dest->val;
+    decoding.is_jmp = 1;
+  } else {
+    // 条件不成立：坚决清零，绝不给后面的指令（比如 xor）留污染！
+    decoding.is_jmp = 0;
   }
 
   print_asm("j%s %x", get_cc_name(subcode >> 1), decoding.seq_eip + id_dest->val);
