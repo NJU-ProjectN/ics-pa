@@ -245,10 +245,17 @@ static make_EHelper(2byte_esc) {
 }
 
 make_EHelper(real) {
+  vaddr_t temp_eip = *eip;
+  uint8_t first_byte = instr_fetch(eip, 1); 
+  *eip = temp_eip;
+
   uint32_t opcode = instr_fetch(eip, 1);
   decoding.opcode = opcode; 
   set_width(opcode_table[opcode].width);
   idex(eip, &opcode_table[opcode]);
+  
+  printf("[LEN_CHECK] EIP: 0x%08x | Opcode: 0x%02x | Next_EIP: 0x%08x | Advanced: %d bytes\n", 
+       temp_eip, first_byte, *eip, (int)(*eip - temp_eip));
 }
 
 static inline void update_eip(void) {
@@ -260,6 +267,7 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
+  
   decoding.is_jmp = 0;
   decoding.jmp_eip = 0;
 
