@@ -10,6 +10,8 @@ rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
 make_EHelper(jcc) {
   // the target address is calculated at the decode stage
   uint8_t subcode = decoding.opcode & 0xf;
+  printf("[DEBUG JCC] opcode: 0x%x, subcode: %d, index: %d\n", 
+          decoding.opcode, subcode, subcode >> 1);
   bool invert = subcode & 0x1;
   rtl_setcc(&t2, subcode >> 1);
   if (invert) {
