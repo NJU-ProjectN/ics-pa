@@ -37,27 +37,37 @@ make_EHelper(add) {
 
 make_EHelper(sub) {
   rtl_sub(&t2, &id_dest->val, &id_src->val);
-  operand_write(id_dest, &t2);
+  
+  // 1. 严格在写回前算好所有的标志位，防止 destination 被覆盖
   rtl_update_ZFSF(&t2, id_dest->width);
-  // CF
-  rtl_sltu(&t3, &id_dest->val, &t2);
+  
+  // CF: 始终通过比较源操作数的大小来判定无符号借位
+  rtl_sltu(&t3, &id_dest->val, &id_src->val);
   rtl_set_CF(&t3);
-  // OF 
+  
+  // OF: 减法溢出标志标准 RTL 运算
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);
   rtl_msb(&t0, &t0, id_dest->width);
   rtl_set_OF(&t0);
+
+  // 2. 标志位锁死后，再执行写回
+  operand_write(id_dest, &t2);
+
   print_asm_template2(sub);
 }
 
 make_EHelper(cmp) {
   rtl_sub(&t2, &id_dest->val, &id_src->val);
+  
   rtl_update_ZFSF(&t2, id_dest->width);
-  // CF
+  
+  // CF: 保持与 sub 完全纯正一致的逻辑
   rtl_sltu(&t3, &id_dest->val, &id_src->val);
   rtl_set_CF(&t3);
-  // OF 
+  
+  // OF: 保持与 sub 完全纯正一致的逻辑
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);
