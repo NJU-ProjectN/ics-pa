@@ -174,6 +174,12 @@ static inline void rtl_push(const rtlreg_t* src1) {
   // M[esp] <- src1
   cpu.esp -= 4;
   rtl_sm(&cpu.esp, 4, src1);
+
+  rtlreg_t check_val = vaddr_read(cpu.esp, 4); 
+  
+  if (check_val != *src1) {
+      printf("[ERROR] Memory Write Mismatch at 0x%08x! Expected: 0x%08x, Actual: 0x%08x\n", cpu.esp, *src1, check_val);
+  }
 }
 
 static inline void rtl_pop(rtlreg_t* dest) {
