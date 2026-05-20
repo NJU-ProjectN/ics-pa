@@ -46,8 +46,8 @@ make_EHelper(call) {
 }
 
 make_EHelper(ret) {
-  printf("[RET DEBUG] Target EIP pushed to jmp_eip: 0x%08x\n", decoding.jmp_eip);
   rtlreg_t target_eip = vaddr_read(cpu.esp, 4);
+  printf("[RET REAL] Current ESP: 0x%08x, Value in Stack: 0x%08x\n", cpu.esp, target_eip);
   cpu.esp += 4;
   decoding.jmp_eip = target_eip;
   decoding.is_jmp = 1;
