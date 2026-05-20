@@ -9,6 +9,7 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
+  /*
   if (id_src->type == OP_TYPE_MEM) {
     rtl_lm(&id_src->val, &id_src->addr, id_src->width);
     rtl_push(&id_src->val);
@@ -23,6 +24,32 @@ make_EHelper(push) {
   }
 
   
+  print_asm_template1(push);
+  */
+ rtlreg_t push_val = 0; // 局部变量，高位天然全零，绝对干净
+
+  // 1. 根据操作数类型，统一将值提取到局部变量 push_val 中
+  if (id_src->type == OP_TYPE_MEM) {
+    rtl_lm(&push_val, &id_src->addr, id_src->width);
+  }
+  else if (id_src->type == OP_TYPE_REG || id_src->type == OP_TYPE_IMM) {
+    push_val = id_src->val;
+  }
+  else if (id_dest->type == OP_TYPE_MEM) {
+    rtl_lm(&push_val, &id_dest->addr, id_dest->width);
+  }
+  else {
+    push_val = id_dest->val;
+  }
+
+  // 2. 🟢 核心安全锁：根据当前操作数宽度，对高位进行严格的零扩展或清洗
+  if (id_src->width < 4) {
+    push_val &= (1 << (id_src->width * 8)) - 1;
+  }
+
+  // 3. 将这个绝对安全的纯洁 32 位数值压入栈顶
+  rtl_push(&push_val);
+
   print_asm_template1(push);
 }
 
