@@ -81,6 +81,7 @@ static inline void load_img() {
 }
 
 static inline void restart() {
+  memset(&cpu, 0, sizeof(CPU_state));
   /* Set the initial instruction pointer. */
   cpu.eip = ENTRY_START;
   cpu.esp = 0x02000000;
