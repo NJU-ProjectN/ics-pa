@@ -20,6 +20,10 @@ make_EHelper(and) {
 }
 
 make_EHelper(xor) {
+  if (cpu.eip == 0x001000bf) {
+    printf("🚨 [XORL DETECTION] src.type = %d, dest.type = %d, src.val = 0x%x\n", 
+            id_src->type, id_dest->type, id_src->val);
+  }
   rtl_xor(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
   rtl_update_ZFSF(&t2, id_dest->width);

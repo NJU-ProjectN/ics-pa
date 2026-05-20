@@ -52,10 +52,8 @@ make_EHelper(call) {
 }
 
 make_EHelper(ret) {
-  // 1. 从当前的栈顶稳稳读出返回地址
+  printf("[RET DEBUG] Target EIP pushed to jmp_eip: 0x%08x\n", decoding.jmp_eip);
   rtlreg_t target_eip = vaddr_read(cpu.esp, 4);
-
-  // 2. 栈指针恢复（Pop 动作）
   cpu.esp += 4;
   decoding.jmp_eip = target_eip;
   decoding.is_jmp = 1;
