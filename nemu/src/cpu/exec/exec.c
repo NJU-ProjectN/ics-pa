@@ -85,13 +85,13 @@ make_group(gp2,
 
   /* 0xf6, 0xf7 */
 make_group(gp3,
-    EX(test), EX(idiv), EMPTY, EMPTY,
-    EMPTY, EMPTY, EMPTY, EMPTY)
+    EX(test), EMPTY, EMPTY,
+    EMPTY, EMPTY, EMPTY, EMPTY, EX(idiv))
 
   /* 0xfe */
 make_group(gp4,
     EMPTY, EX(dec), EMPTY, EMPTY,
-    EMPTY, EMPTY, EMPTY, EMPTY)
+    EMPTY, EMPTY, EMPTY, EX(idiv))
 
   /* 0xff */
 make_group(gp5,
