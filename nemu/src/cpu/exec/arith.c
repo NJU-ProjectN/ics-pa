@@ -71,6 +71,11 @@ make_EHelper(cmp) {
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);
+
+  if (id_dest->width == 1)      t0 &= 0x80;
+  else if (id_dest->width == 2) t0 &= 0x8000;
+  else if (id_dest->width == 4) t0 &= 0x80000000;
+
   rtl_msb(&t0, &t0, id_dest->width);
   rtl_set_OF(&t0);
 
