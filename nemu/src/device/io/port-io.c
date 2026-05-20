@@ -1,6 +1,8 @@
 #include "common.h"
 #include "device/port-io.h"
 
+typedef uint16_t ioaddr_t;
+
 #define PORT_IO_SPACE_MAX 65536
 #define NR_MAP 8
 

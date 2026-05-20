@@ -45,7 +45,10 @@ uint32_t pio_read(ioaddr_t, int);
 void pio_write(ioaddr_t, int, uint32_t);
 
 make_EHelper(in) {
-  TODO();
+  uint32_t port = id_src->val;
+  uint32_t val = pio_read(port, id_dest->width);
+  
+  operand_write(id_dest, &val);
 
   print_asm_template2(in);
 
@@ -55,7 +58,10 @@ make_EHelper(in) {
 }
 
 make_EHelper(out) {
-  TODO();
+  uint32_t port = id_src->val;
+  uint32_t val = id_dest->val;
+  
+  pio_write(port, id_dest->width, val);
 
   print_asm_template2(out);
 
