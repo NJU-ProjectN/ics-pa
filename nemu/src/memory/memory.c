@@ -12,12 +12,19 @@ uint8_t pmem[PMEM_SIZE];
 /* Memory accessing interfaces */
 
 uint32_t paddr_read(paddr_t addr, int len) {
-  return pmem_rw(addr, uint32_t) & (~0u >> ((4 - len) << 3));
+  if (len == 1) {
+    return pmem_rw(addr, uint8_t);
+  } else if (len == 2) {
+    return pmem_rw(addr, uint16_t);
+  } else if (len == 4) {
+    return pmem_rw(addr, uint32_t);
+  } else {
+    Assert(0, "Invalid internal read length: %d", len);
+  }
+  return 0;
 }
 
 void paddr_write(paddr_t addr, int len, uint32_t data) {
-  // 🟢 借用完美的 pmem_rw 宏进行安全的边界检查与直写！
-  // 根据不同的长度，强转成对应类型的指针并直接赋值
   if (len == 1) {
     pmem_rw(addr, uint8_t) = (uint8_t)data;
   } else if (len == 2) {
