@@ -38,7 +38,8 @@ make_EHelper(call) {
 
   // 2. 计算跳转目标
   // Target = 返回地址 + 译码出的偏移量
-  decoding.jmp_eip = decoding.seq_eip + id_dest->val;
+  int32_t offset = (int32_t)id_dest->val;
+  decoding.jmp_eip = decoding.seq_eip + offset;
   decoding.is_jmp = 1;
 
   print_asm("call %x", decoding.jmp_eip);
