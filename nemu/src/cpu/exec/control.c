@@ -2,9 +2,9 @@
 
 make_EHelper(jmp) {
   // the target address is calculated at the decode stage
-  decoding.is_jmp = 1;
+rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
 
-  print_asm("jmp %x", decoding.jmp_eip);
+  print_asm_template1(jmp);
 }
 
 make_EHelper(jcc) {
