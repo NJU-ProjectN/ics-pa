@@ -10,7 +10,11 @@ rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
 make_EHelper(jcc) {
   // the target address is calculated at the decode stage
   uint8_t subcode = decoding.opcode & 0xf;
-  rtl_setcc(&t2, subcode);
+  bool invert = subcode & 0x1;
+  rtl_setcc(&t2, subcode >> 1);
+  if (invert) {
+    rtl_xori(&t2, &t2, 1); // 或者是 t2 = !t2; 
+  }
   decoding.is_jmp = t2;
 
   print_asm("j%s %x", get_cc_name(subcode), decoding.jmp_eip);

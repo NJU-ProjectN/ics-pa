@@ -253,10 +253,6 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
-  if (cpu.eip >= 0x100032 && cpu.eip <= 0x10003d) {
-  printf("[DEBUG] EIP: 0x%08x, Opcode: 0x%02x, decoding.opcode: 0x%x\n", 
-          cpu.eip, instr_fetch(&cpu.eip, 0), decoding.opcode);
-}
 #ifdef DEBUG
   decoding.p = decoding.asm_buf;
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
