@@ -296,7 +296,7 @@ void exec_wrapper(bool print_flag) {
   printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
   #endif
   update_eip();
-  
+  decoding.is_operand_size_16 = false;
 #ifdef DIFF_TEST
   void difftest_step(uint32_t);
   difftest_step(eip);
