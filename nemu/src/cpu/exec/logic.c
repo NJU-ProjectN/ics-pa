@@ -81,9 +81,11 @@ make_EHelper(shr) {
 }
 
 make_EHelper(setcc) {
-  rtl_get_ZF(&t2);
+  uint8_t subcode = decoding.opcode & 0xf; 
+  
+  rtl_setcc(&t2, subcode);
   operand_write(id_dest, &t2);
-
+  
   print_asm_template1(setcc);
 }
 
