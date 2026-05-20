@@ -282,6 +282,8 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
+  uint32_t esp_before_exec = cpu.esp;
+  vaddr_t this_eip = decoding.seq_eip;
   vaddr_t instr_eip = cpu.eip;
   memset(&decoding, 0, sizeof(decoding));
   decoding.is_jmp = 0;
@@ -331,4 +333,14 @@ void exec_wrapper(bool print_flag) {
   void difftest_step(uint32_t);
   difftest_step(eip);
 #endif
+if (cpu.esp != esp_before_exec) {
+    uint8_t op = decoding.opcode;
+    // 过滤掉正常的栈操作指令 (push, pop, call, ret 等)
+    if (!((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8)) {
+       printf("\n[🔥 DECODE/EXEC ALARM] 抓到内鬼指令了！\n");
+       printf("在 EIP = 0x%x, Opcode = 0x%x 处：\n", this_eip, op);
+       printf("执行前 ESP = 0x%x -> 执行后 ESP = 0x%x (异常位移了 %d 字节！)\n\n", 
+               esp_before_exec, cpu.esp, (int)(cpu.esp - esp_before_exec));
+    }
+  }
 }
