@@ -253,12 +253,9 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
-  #ifdef DEBUG
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ASM: %s\n", 
-          decoding.is_jmp ? decoding.jmp_eip : decoding.seq_eip, cpu.esp, decoding.assembly);
-  #else
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
-  #endif
+  decoding.is_jmp = 0;
+  decoding.jmp_eip = 0;
+
 #ifdef DEBUG
   decoding.p = decoding.asm_buf;
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
@@ -281,7 +278,12 @@ void exec_wrapper(bool print_flag) {
 #endif
 
   update_eip();
-
+  #ifdef DEBUG
+  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ASM: %s\n", 
+          decoding.is_jmp ? decoding.jmp_eip : decoding.seq_eip, cpu.esp, decoding.assembly);
+  #else
+  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
+  #endif
 #ifdef DIFF_TEST
   void difftest_step(uint32_t);
   difftest_step(eip);
