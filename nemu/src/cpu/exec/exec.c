@@ -218,7 +218,7 @@ opcode_entry opcode_table [512] = {
   /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xac */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul),
   /* 0xb0 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xb4 */	EMPTY, EMPTY, IDEX(E2G, movzx), EMPTY,
+  /* 0xb4 */	EMPTY, EMPTY, IDEXW(mov_E2G, movzx, 1), EMPTY,
   /* 0xb8 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xbc */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc0 */	EMPTY, EMPTY, EMPTY, EMPTY,
@@ -251,9 +251,22 @@ make_EHelper(real) {
 
   uint32_t opcode = instr_fetch(eip, 1);
   decoding.opcode = opcode; 
-  set_width(opcode_table[opcode].width);
-  idex(eip, &opcode_table[opcode]);
-
+  if (opcode == 0x0f) {
+    // 再次向前读取一个字节，作为真正的双字节操作码
+    opcode = instr_fetch(eip, 1);
+    decoding.opcode = opcode;
+    
+    // 【核心亮点】：由于你的双字节表紧跟在 256 之后，索引直接加上 256！
+    uint32_t table_index = 256 + opcode;
+    
+    set_width(opcode_table[table_index].width);
+    idex(eip, &opcode_table[table_index]);
+  } 
+  else {
+    // 正常的单字节指令
+    set_width(opcode_table[opcode].width);
+    idex(eip, &opcode_table[opcode]);
+  }
 }
 
 static inline void update_eip(void) {
@@ -266,6 +279,7 @@ static inline void update_eip(void) {
 
 void exec_wrapper(bool print_flag) {
   
+  memset(&decoding, 0, sizeof(decoding));
   decoding.is_jmp = 0;
   decoding.jmp_eip = 0;
 
