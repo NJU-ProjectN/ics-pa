@@ -48,6 +48,24 @@ static inline int check_reg_index(int index) {
 #define reg_w(index) (cpu.gpr[check_reg_index(index)]._16)
 #define reg_b(index) (cpu.gpr[check_reg_index(index) & 0x3]._8[index >> 2])
 
+static inline void set_reg_l(int i, uint32_t val) {
+  cpu.gpr[check_reg_index(i)]._32 = val;
+}
+static inline void set_reg_w(int i, uint32_t val) {
+  int r = check_reg_index(i);
+  cpu.gpr[r]._32 =
+      (cpu.gpr[r]._32 & 0xffff0000) |
+      (val & 0xffff);
+}
+static inline void set_reg_b(int i, uint32_t val) {
+  int r = check_reg_index(i & 0x3);
+  int off = (i >> 2) * 8;
+
+  cpu.gpr[r]._32 =
+      (cpu.gpr[r]._32 & ~(0xff << off)) |
+      ((val & 0xff) << off);
+}
+
 extern const char* regsl[];
 extern const char* regsw[];
 extern const char* regsb[];

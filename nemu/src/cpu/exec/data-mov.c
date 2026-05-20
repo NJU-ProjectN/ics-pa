@@ -8,21 +8,18 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
-  if (id_src->type == OP_TYPE_MEM) {
-    rtl_lm(&id_src->val, &id_src->addr, id_src->width);
-    rtl_push(&id_src->val);
-  }
-  else if (id_dest->type == OP_TYPE_MEM) {
-    rtl_lm(&id_dest->val, &id_dest->addr, id_dest->width);
-    rtl_push(&id_dest->val);
-  }
-  else {
-    rtlreg_t *val = (id_src->type == OP_TYPE_REG || id_src->type == OP_TYPE_IMM) ? &id_src->val : &id_dest->val;
-    rtl_push(val);
-  }
+    rtlreg_t val;
 
-  
-  print_asm_template1(push);
+    if (id_src->type == OP_TYPE_MEM) {
+        rtl_lm(&val, &id_src->addr, id_src->width);
+    }
+    else {
+        val = id_src->val;
+    }
+
+    rtl_push(&val);
+
+    print_asm_template1(push);
 }
 
 make_EHelper(pop) {
