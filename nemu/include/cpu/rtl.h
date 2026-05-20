@@ -64,6 +64,9 @@ static inline void rtl_lm(rtlreg_t *dest, const rtlreg_t* addr, int len) {
 }
 
 static inline void rtl_sm(rtlreg_t* addr, int len, const rtlreg_t* src1) {
+  if (*addr == 0x7bb8) {
+      printf("[!!! ATTENTION !!!] Someone is writing to 0x7bb8! EIP=0x%08x\n", cpu.eip);
+  }
   vaddr_write(*addr, len, *src1);
 }
 
