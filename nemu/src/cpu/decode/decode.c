@@ -286,7 +286,7 @@ make_DHelper(a2O) {
 }
 
 make_DHelper(J) {
-  decode_op_SI(eip, id_dest, false);
+  decode_op_SI(eip, id_dest, true);
   
   id_dest->val = id_dest->simm;
 }

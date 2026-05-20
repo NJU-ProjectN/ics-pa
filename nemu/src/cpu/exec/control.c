@@ -33,6 +33,11 @@ make_EHelper(jmp_rm) {
 make_EHelper(call) {
     // push 返回地址
     printf("DEBUG: Call: pushing ret addr 0x%08x\n", decoding.seq_eip);
+    int32_t offset = (int32_t)id_dest->val;
+    // seq_eip 应该是 call 指令的下一条指令地址 (0x10000f)
+    // 目标地址应该是 0x10000f + offset = 0x10001c
+    printf("DEBUG: CALL calc: seq_eip=0x%08x, offset=0x%08x, target=0x%08x\n", 
+            decoding.seq_eip, offset, decoding.seq_eip + offset);
     rtlreg_t ret_addr = decoding.seq_eip; 
     rtl_push(&ret_addr);
 
