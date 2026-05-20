@@ -10,17 +10,18 @@ make_EHelper(jmp) {
 
 make_EHelper(jcc) {
   uint8_t subcode = decoding.opcode & 0xf;
+  
   rtl_setcc(&t2, subcode); 
-  
-
-  print_asm("jcc %x", decoding.seq_eip + id_dest->val); 
-  
+  printf("[DEBUG JCC] opcode=0x%x, subcode=%d, t2_result=%d, dest_val=0x%x, target=0x%x\n", 
+          decoding.opcode, subcode, t2, id_dest->val, decoding.seq_eip + id_dest->val);
   if (t2) {
     decoding.jmp_eip = decoding.seq_eip + id_dest->val;
     decoding.is_jmp = 1;
   } else {
     decoding.is_jmp = 0;
   }
+
+  print_asm("jcc %x", decoding.is_jmp ? decoding.jmp_eip : decoding.seq_eip);
 }
 
 make_EHelper(jmp_rm) {
