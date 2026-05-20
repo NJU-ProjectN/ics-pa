@@ -51,15 +51,15 @@ void paddr_write(paddr_t addr, int len, uint32_t data) {
 }
 
 uint32_t vaddr_read(vaddr_t addr, int len) {
-  if (addr >= 0xff000000) {
-    addr = addr & 0xffff; // 0xfffffff0 & 0xffff = 0xfff0
+  if (addr >= PMEM_SIZE) {
+    addr = addr & (PMEM_SIZE - 1);
   }
   return paddr_read(addr, len);
 }
 
 void vaddr_write(vaddr_t addr, int len, uint32_t data) {
-  if (addr >= 0xff000000) {
-    addr = addr & 0xffff;
+  if (addr >= PMEM_SIZE) {
+    addr = addr & (PMEM_SIZE - 1);
   }
   paddr_write(addr, len, data);
 }
