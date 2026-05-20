@@ -38,27 +38,15 @@ make_EHelper(jmp_rm) {
 }
 
 make_EHelper(call) {
-  // 1. 如果 AM 把栈初始化在了 1MB 以下的非法区域 (如 0x7c00)，依然帮它拉回安全区
   if (cpu.esp < 0x100000) {
     cpu.esp = 0x00800000;
   }
-
-  vaddr_t next_ip = decoding.seq_eip;
-  
-  // 2. 现场读取 4 字节相对偏移量
-  int32_t offset = instr_fetch(&next_ip, 4); 
-  rtlreg_t return_addr = next_ip;
-
-  // 3. 更新 ESP 寄存器
+  rtlreg_t return_addr = decoding.seq_eip;
   cpu.esp -= 4;
-  
-  // 🟢 核心修正：严格按照 (地址, 长度, 数据) 的顺序传参！
   vaddr_write(cpu.esp, 4, return_addr); 
 
-  // 4. 更新跳转状态
-  decoding.jmp_eip = return_addr + offset;
+  decoding.jmp_eip = decoding.seq_eip + id_dest->val;
   decoding.is_jmp = 1;
-  decoding.seq_eip = next_ip;
 
   print_asm("call %x", decoding.jmp_eip);
 }
@@ -69,12 +57,8 @@ make_EHelper(ret) {
 
   // 2. 栈指针恢复（Pop 动作）
   cpu.esp += 4;
-
-  // 3. 🟢 暴力破局：直接强行改写 CPU 的 eip 和译码跟踪指针，不给框架任何留校查看的机会！
-  cpu.eip = target_eip;
   decoding.jmp_eip = target_eip;
   decoding.is_jmp = 1;
-  decoding.seq_eip = target_eip; // 全线锁死目标地址
 
   print_asm("ret");
 }
