@@ -16,9 +16,9 @@ make_EHelper(push) {
     else {
         val = id_src->val;
     }
-
+     printf("[DEBUG PUSH] Before: ESP=0x%08x\n", cpu.esp);
     rtl_push(&val);
-
+    printf("[DEBUG PUSH] After: ESP=0x%08x\n", cpu.esp);
     print_asm_template1(push);
 }
 
