@@ -282,7 +282,7 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
-  
+  vaddr_t instr_eip = cpu.eip;
   memset(&decoding, 0, sizeof(decoding));
   decoding.is_jmp = 0;
   decoding.jmp_eip = 0;
@@ -291,7 +291,7 @@ void exec_wrapper(bool print_flag) {
   decoding.p = decoding.asm_buf;
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
 #endif
-  decoding.seq_eip = cpu.eip;
+  decoding.seq_eip = instr_eip;
   printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   exec_real(&decoding.seq_eip);
   printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
