@@ -173,10 +173,6 @@ static inline void rtl_sext(rtlreg_t* dest, const rtlreg_t* src1, int width) {
 }
 
 static inline void rtl_push(const rtlreg_t* src1) {
-  if (*src1 == 0 || (*src1 > 0x80000000 && *src1 < 0xffff0000)) {
-        printf("[DEBUG] !!! 疑似压入非法返回地址: 0x%08x, EIP: 0x%08x\n", *src1, cpu.eip);
-        assert(0); // 强行让程序崩溃在这里，查看当前的调用栈
-    }
     cpu.esp -= 4;
     vaddr_write(cpu.esp, 4, *src1); 
 }
