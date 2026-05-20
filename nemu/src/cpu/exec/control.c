@@ -13,7 +13,7 @@ make_EHelper(jcc) {
   bool invert = subcode & 0x1;
   rtl_setcc(&t2, subcode >> 1);
   if (invert) {
-    rtl_xori(&t2, &t2, 1); // 或者是 t2 = !t2; 
+    rtl_xori(&t2, &t2, 1);
   }
   if (t2) {
     rtl_add(&cpu.eip, &decoding.seq_eip, &id_dest->val);
