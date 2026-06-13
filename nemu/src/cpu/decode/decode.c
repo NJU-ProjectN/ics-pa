@@ -13,6 +13,7 @@ const rtlreg_t tzero = 0;
 /* Ib, Iv */
 static inline make_DopHelper(I) {
   /* eip here is pointing to the immediate */
+  assert(op->width >= 1 && op->width <= 4);
   op->type = OP_TYPE_IMM;
   op->imm = instr_fetch(eip, op->width);
   rtl_li(&op->val, op->imm);
@@ -40,6 +41,8 @@ static inline make_DopHelper(SI) {
    */
   if (op->width == 1) {
     op->simm = (int32_t)(int8_t)instr_fetch(eip, 1);
+  } else if (op->width == 2) {
+    op->simm = (int32_t)(int16_t)instr_fetch(eip, 2);
   } else {
     op->simm = (int32_t)instr_fetch(eip, 4);
   }
@@ -141,6 +144,7 @@ make_DHelper(lea_M2G) {
  */
 make_DHelper(I2a) {
   decode_op_a(eip, id_dest, true);
+   id_src->width = id_dest->width;
   decode_op_I(eip, id_src, true);
 }
 
@@ -158,6 +162,7 @@ make_DHelper(I_E2G) {
  */
 make_DHelper(I2E) {
   decode_op_rm(eip, id_dest, true, NULL, false);
+   id_src->width = id_dest->width;
   decode_op_I(eip, id_src, true);
 }
 
@@ -174,6 +179,7 @@ make_DHelper(mov_I2E) {
  */
 make_DHelper(I2r) {
   decode_op_r(eip, id_dest, true);
+   id_src->width = id_dest->width;
   decode_op_I(eip, id_src, true);
 }
 
@@ -181,7 +187,7 @@ make_DHelper(mov_I2r) {
   id_dest->type = OP_TYPE_REG;
   id_dest->reg = decoding.opcode & 0x7;
   id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
-
+   id_src->width = id_dest->width;
   // 2. 放心让它去读取接下来的 4 字节立即数
   decode_op_I(eip, id_src, true);
 }
@@ -258,6 +264,7 @@ make_DHelper(gp2_cl2E) {
   decode_op_rm(eip, id_dest, true, NULL, false);
   id_src->type = OP_TYPE_REG;
   id_src->reg = R_CL;
+  id_src->width = 1; 
   rtl_lr_b(&id_src->val, R_CL);
 #ifdef DEBUG
   sprintf(id_src->str, "%%cl");
@@ -306,6 +313,7 @@ make_DHelper(in_I2a) {
 make_DHelper(in_dx2a) {
   id_src->type = OP_TYPE_REG;
   id_src->reg = R_DX;
+  id_src->width = 2; 
   rtl_lr_w(&id_src->val, R_DX);
 #ifdef DEBUG
   sprintf(id_src->str, "(%%dx)");

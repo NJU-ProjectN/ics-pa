@@ -1,5 +1,7 @@
-#include "common.h"
+#include "common.h" 
 #include "device/port-io.h"
+
+extern uint8_t *pio_space;
 
 /* http://en.wikibooks.org/wiki/Serial_Programming/8250_UART_Programming */
 
@@ -26,4 +28,19 @@ void serial_io_handler(ioaddr_t addr, int len, bool is_write) {
 void init_serial() {
   serial_port_base = add_pio_map(SERIAL_PORT, 8, serial_io_handler);
   serial_port_base[LSR_OFFSET] = 0x20; /* the status is always free */
+}
+static uint8_t key_buffer = 0; // 存放按键码
+static bool has_key = false;   // 状态标志
+ void i8042_io_handler(ioaddr_t addr, int len, bool is_write) {
+  if (!is_write) {
+    if (addr == 0x60) {
+      // CPU 读取数据端口 (IN)
+      *(uint32_t *)(pio_space + addr) = key_buffer;
+      has_key = false; // 读取后重置状态
+    } else if (addr == 0x64) {
+      // CPU 读取状态端口 (IN)
+      // bit 0 为 1 表示有数据
+      *(uint32_t *)(pio_space + addr) = has_key ? 0x1 : 0x0;
+    }
+  }
 }

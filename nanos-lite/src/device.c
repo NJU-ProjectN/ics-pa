@@ -1,4 +1,5 @@
 #include "common.h"
+#include "i8042.h"
 
 #define NAME(key) \
   [_KEY_##key] = #key,
@@ -24,6 +25,7 @@ void init_device() {
   _ioe_init();
 
   // TODO: print the string to array `dispinfo` with the format
+  add_pio_map(0x60, 4, i8042_io_handler);
   // described in the Navy-apps convention
   snprintf(dispinfo, sizeof(dispinfo), "WIDTH:%d,HEIGHT:%d", 400, 300);
 }
