@@ -282,8 +282,6 @@ static inline void update_eip(void) {
 }
 
 void exec_wrapper(bool print_flag) {
-  uint32_t esp_before_exec = cpu.esp;
-  vaddr_t this_eip = decoding.seq_eip;
   vaddr_t instr_eip = cpu.eip;
   memset(&decoding, 0, sizeof(decoding));
   decoding.is_jmp = 0;
@@ -294,18 +292,9 @@ void exec_wrapper(bool print_flag) {
   decoding.p += sprintf(decoding.p, "%8x:   ", cpu.eip);
 #endif
   decoding.seq_eip = instr_eip;
-  uint32_t old_esp = cpu.esp;
   //printf("DEBUG: Before exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
   exec_real(&decoding.seq_eip);
   //printf("DEBUG: After exec_real, seq_eip = 0x%08x\n", decoding.seq_eip);
-  if (cpu.esp != old_esp) {
-  // 过滤掉正常的 push/pop 系列指令（操作码 0x50-0x5F, 0x6A, 0x68, 0x8F 等）
-  uint8_t op = decoding.opcode;
-  if (!((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8)) {
-        printf("[ALARM ESP CHANGED] EIP: 0x%x, Opcode: 0x%x, ESP 异常从 0x%x 变到了 0x%x！\n", 
-          instr_eip, op, old_esp, cpu.esp);
-  }
-}
 #ifdef DEBUG
   int instr_len = decoding.seq_eip - cpu.eip;
   sprintf(decoding.p, "%*.s", 50 - (12 + 3 * instr_len), "");
@@ -320,12 +309,6 @@ void exec_wrapper(bool print_flag) {
   uint32_t eip = cpu.eip;
 #endif
 
-#ifdef DEBUG
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x, ECX = 0x%08x, ASM: %s\n",
-    cpu.eip, cpu.esp, cpu.gpr[1]._32, decoding.assembly);
-#else
-  printf("[TRACE] EIP = 0x%08x, ESP = 0x%08x\n", cpu.eip, cpu.esp);
-#endif
 
   update_eip();
   decoding.is_operand_size_16 = false;
@@ -333,21 +316,4 @@ void exec_wrapper(bool print_flag) {
   void difftest_step(uint32_t);
   difftest_step(eip);
 #endif
-if (cpu.esp != esp_before_exec) {
-    uint8_t op = decoding.opcode;
-    
-    // 过滤掉原本的栈操作指令：push, pop, call, ret
-    bool is_standard_stack_op = ((op >= 0x50 && op <= 0x5f) || op == 0x68 || op == 0x6a || op == 0x8f || op == 0xc3 || op == 0xe8);
-    
-    // 过滤掉编译器的栈对齐/分配传参指令：addl / subl 改变的栈
-    int32_t diff = (int32_t)(cpu.esp - esp_before_exec);
-    bool is_stack_align = (op == 0x81 || op == 0x83) && (diff % 4 == 0 && diff >= -64 && diff <= 64);
-
-    if (!is_standard_stack_op && !is_stack_align) {
-       printf("\n[🔥 DECODE/EXEC ALARM] 抓到真正的内鬼指令了！\n");
-       printf("在 EIP = 0x%x, Opcode = 0x%x 处：\n", this_eip, op);
-       printf("执行前 ESP = 0x%x -> 执行后 ESP = 0x%x (异常位移了 %d 字节！)\n\n", 
-               esp_before_exec, cpu.esp, diff);
-    }
-  }
 }
