@@ -41,9 +41,6 @@ make_EHelper(sub) {
 make_EHelper(cmp) {
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   rtl_sltu(&t3, &id_dest->val, &t2);
-  //printf("dest:%d",id_dest->val);
-  //printf("src:%d",id_src->val);
-  //printf("res:%d\n",t2);
 
   rtl_update_ZFSF(&t2, id_dest->width);
 
@@ -63,12 +60,11 @@ make_EHelper(cmp) {
 make_EHelper(inc) {
 
   rtl_addi(&t2, &id_dest->val, 1);
-  rtl_sltu(&t3, &t2, &id_dest->val);
+
   operand_write(id_dest, &t2);
 
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  rtl_set_CF(&t3);
 
   rtl_xori(&t0, &id_dest->val,1);
   rtl_not(&t0);
@@ -82,12 +78,10 @@ make_EHelper(inc) {
 
 make_EHelper(dec) {
   rtl_subi(&t2, &id_dest->val, 1);
-  rtl_sltu(&t3, &id_dest->val, &t2);
   operand_write(id_dest, &t2);
 
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  rtl_set_CF(&t3);
 
   rtl_xori(&t0, &id_dest->val, 1);
   rtl_xor(&t1, &id_dest->val, &t2);
@@ -99,7 +93,8 @@ make_EHelper(dec) {
 }
 
 make_EHelper(neg) {
-  rtl_eq0(&t0,&id_dest->val);
+  rtl_eq0(&t0, &id_dest->val);
+  rtl_xori(&t0, &t0, 1);          // 取反
   rtl_set_CF(&t0);
   rtl_sub(&t2,&tzero,&id_dest->val);
   operand_write(id_dest, &t2);
