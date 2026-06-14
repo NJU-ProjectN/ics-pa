@@ -50,11 +50,14 @@ void i8042_io_handler(ioaddr_t addr, int len, bool is_write) {
   if (!is_write) {
     if (addr == I8042_DATA_PORT) {
       i8042_status_port_base[0] &= ~I8042_STATUS_HASKEY_MASK;
+      // 读数据端口后，可选清零数据端口，避免遗留值
+      i8042_data_port_base[0] = 0;
     }
     else if (addr == I8042_STATUS_PORT) {
       if ((i8042_status_port_base[0] & I8042_STATUS_HASKEY_MASK) == 0) {
         if (key_f != key_r) {
-          i8042_data_port_base[0] = key_queue[key_f];
+          // 只保留低 16 位，高位填 0，避免 eax 被污染
+          i8042_data_port_base[0] = (key_queue[key_f] & 0xFFFF) | 0x00000000;
           i8042_status_port_base[0] |= I8042_STATUS_HASKEY_MASK;
           key_f = (key_f + 1) % KEY_QUEUE_LEN;
         }
@@ -67,4 +70,5 @@ void init_i8042() {
   i8042_data_port_base = add_pio_map(I8042_DATA_PORT, 4, i8042_io_handler);
   i8042_status_port_base = add_pio_map(I8042_STATUS_PORT, 1, i8042_io_handler);
   i8042_status_port_base[0] = 0x0;
+  memset(i8042_data_port_base, 0, 4);
 }
