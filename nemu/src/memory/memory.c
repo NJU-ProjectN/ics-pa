@@ -12,20 +12,7 @@ uint8_t pmem[PMEM_SIZE];
 /* Memory accessing interfaces */
 
 uint32_t paddr_read(paddr_t addr, int len) {
-  if (addr >= PMEM_SIZE) {
-    printf("\n[NEMU FATAL MEMORY READ]\n");
-    printf("访问非法物理地址: 0x%08x (len = %d)\n", addr, len);
-    printf("此时 CPU 状态:\n");
-    printf("  EIP = 0x%08x\n", cpu.eip);
-    printf("  ESP = 0x%08x\n", cpu.esp);
-    printf("  EBP = 0x%08x\n", cpu.ebp);
-    printf("  EAX = 0x%08x, EBX = 0x%08x\n", cpu.eax, cpu.ebx);
-    printf("  ECX = 0x%08x, EDX = 0x%08x\n", cpu.ecx, cpu.edx);
-    printf("  ESI = 0x%08x, EDI = 0x%08x\n", cpu.esi, cpu.edi);
-    
-    // 强制挂起，让我们看清输出后再 assert
-    assert(addr < PMEM_SIZE);
-  }
+
   if (len == 1) {
     return pmem_rw(addr, uint8_t);
   } else if (len == 2) {
