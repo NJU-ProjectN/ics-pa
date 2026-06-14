@@ -11,8 +11,7 @@ void rtl_setcc(rtlreg_t* dest, uint8_t subcode) {
     CC_L, CC_NL, CC_LE, CC_NLE
   };
 
-  // 💥【核心修复】：彻底删掉这里的 rtlreg_t t0 = 0, t1 = 0;
-  // 直接无脑使用全局声明的 t0, t1。千万不要在这里带类型重新声明！
+
 
   switch (subcode & 0xe) {
     case CC_O: 
