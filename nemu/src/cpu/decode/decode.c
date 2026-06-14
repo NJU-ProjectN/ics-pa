@@ -167,9 +167,11 @@ make_DHelper(I2E) {
 }
 
 make_DHelper(mov_I2E) {
-  int width = decoding.is_operand_size_16 ? 2 : 4;
-  id_dest->width = width;
-  id_src->width = width;
+  // 如果译码表已传入明确的宽度（如字节操作 width=1），则保留
+  if (id_dest->width == 0) {
+    id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
+  }
+  id_src->width = id_dest->width;
   decode_op_rm(eip, id_dest, true, NULL, false);
   decode_op_I(eip, id_src, true);
 }
