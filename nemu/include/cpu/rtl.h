@@ -44,19 +44,27 @@ make_rtl_arith_logic(slt)
 make_rtl_arith_logic(sltu)
 
 static inline void rtl_mul(rtlreg_t* dest_hi, rtlreg_t* dest_lo, const rtlreg_t* src1, const rtlreg_t* src2) {
-  asm volatile("mul %3" : "=d"(*dest_hi), "=a"(*dest_lo) : "a"(*src1), "r"(*src2));
+  uint64_t res = (uint64_t)(*src1) * (*src2);
+  *dest_lo = (uint32_t)res;
+  *dest_hi = (uint32_t)(res >> 32);
 }
 
 static inline void rtl_imul(rtlreg_t* dest_hi, rtlreg_t* dest_lo, const rtlreg_t* src1, const rtlreg_t* src2) {
-  asm volatile("imul %3" : "=d"(*dest_hi), "=a"(*dest_lo) : "a"(*src1), "r"(*src2));
+  int64_t res = (int64_t)(int32_t)(*src1) * (int64_t)(int32_t)(*src2);
+  *dest_lo = (uint32_t)res;
+  *dest_hi = (uint32_t)(res >> 32);
 }
 
 static inline void rtl_div(rtlreg_t* q, rtlreg_t* r, const rtlreg_t* src1_hi, const rtlreg_t* src1_lo, const rtlreg_t* src2) {
-  asm volatile("div %4" : "=a"(*q), "=d"(*r) : "d"(*src1_hi), "a"(*src1_lo), "r"(*src2));
+  uint64_t dividend = ((uint64_t)(*src1_hi) << 32) | (*src1_lo);
+  *q = dividend / (*src2);
+  *r = dividend % (*src2);
 }
 
 static inline void rtl_idiv(rtlreg_t* q, rtlreg_t* r, const rtlreg_t* src1_hi, const rtlreg_t* src1_lo, const rtlreg_t* src2) {
-  asm volatile("idiv %4" : "=a"(*q), "=d"(*r) : "d"(*src1_hi), "a"(*src1_lo), "r"(*src2));
+  int64_t dividend = ((int64_t)(int32_t)(*src1_hi) << 32) | (uint32_t)(*src1_lo);
+  *q = dividend / (int32_t)(*src2);
+  *r = dividend % (int32_t)(*src2);
 }
 
 static inline void rtl_lm(rtlreg_t *dest, const rtlreg_t* addr, int len) {
