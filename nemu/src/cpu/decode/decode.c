@@ -300,7 +300,10 @@ make_DHelper(J) {
 }
 
 make_DHelper(push_SI) {
-  id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
+  // 如果译码表已经设置了宽度（如 push imm8 的 width=1），则保留
+  if (id_dest->width == 0) {
+    id_dest->width = decoding.is_operand_size_16 ? 2 : 4;
+  }
   decode_op_SI(eip, id_dest, true);
 }
 
