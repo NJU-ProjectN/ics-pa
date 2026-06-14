@@ -2,7 +2,6 @@
 #include "monitor/monitor.h"
 #include <SDL2/SDL.h>
 
-void i8042_io_handler(ioaddr_t addr, int len, bool is_write);
 #define I8042_DATA_PORT 0x60
 #define I8042_STATUS_PORT 0x64
 #define I8042_STATUS_HASKEY_MASK 0x1
