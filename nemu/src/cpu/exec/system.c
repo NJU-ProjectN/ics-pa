@@ -58,10 +58,9 @@ make_EHelper(in) {
 }
 
 make_EHelper(out) {
-  uint32_t port = id_src->val;
-  uint32_t val = id_dest->val;
-  
-  pio_write(port, id_dest->width, val);
+  uint32_t port = id_dest->val;      // 端口号
+  uint32_t val = id_src->val;        // 要输出的数据
+  pio_write(port, id_src->width, val);  // 宽度用数据的宽度
 
   print_asm_template2(out);
 
