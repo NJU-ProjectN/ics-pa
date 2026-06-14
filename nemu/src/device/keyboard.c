@@ -50,8 +50,7 @@ void i8042_io_handler(ioaddr_t addr, int len, bool is_write) {
   if (!is_write) {
     if (addr == I8042_DATA_PORT) {
       i8042_status_port_base[0] &= ~I8042_STATUS_HASKEY_MASK;
-      // 读数据端口后，可选清零数据端口，避免遗留值
-      i8042_data_port_base[0] = 0;
+
     }
     else if (addr == I8042_STATUS_PORT) {
       if ((i8042_status_port_base[0] & I8042_STATUS_HASKEY_MASK) == 0) {
