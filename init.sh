@@ -1,12 +1,25 @@
 #!/bin/bash
 
+# pick the rc file of the user's login shell
+case `basename "$SHELL"` in
+  zsh)  RCFILE=${ZDOTDIR:-$HOME}/.zshrc ;;
+  bash) RCFILE=~/.bashrc ;;
+  *)    RCFILE= ;;
+esac
+
 # usage: addenv env_name path
 function addenv() {
-  sed -i -e "/^export $1=.*/d" ~/.bashrc
-  echo -e "\nexport $1=`readlink -e $2`" >> ~/.bashrc
-  echo "By default this script will add environment variables into ~/.bashrc."
-  echo "After that, please run 'source ~/.bashrc' to let these variables take effect."
-  echo "If you use shell other than bash, please add these environment variables manually."
+  if [ -z "$RCFILE" ]; then
+    echo "Unsupported shell $SHELL, please add the following environment variable manually:"
+    echo "  $1=`readlink -f "$2"`"
+    return
+  fi
+  local path=`readlink -f "$2"`
+  touch "$RCFILE"
+  sed -i --follow-symlinks -e "/^export $1=.*/d" "$RCFILE"
+  echo "export $1=\"$path\"" >> "$RCFILE"
+  echo "Environment variable $1 has been added into $RCFILE."
+  echo "Please run 'source $RCFILE' to let it take effect."
 }
 
 # usage: init repo branch directory trace [env]
@@ -14,6 +27,9 @@ function addenv() {
 function init() {
   if [ -d $3 ]; then
     echo "$3 is already initialized, skipping..."
+    if [ $5 ] ; then
+      addenv $5 $3
+    fi
     return
   fi
 
